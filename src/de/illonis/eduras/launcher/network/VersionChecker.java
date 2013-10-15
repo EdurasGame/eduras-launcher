@@ -30,9 +30,17 @@ public class VersionChecker {
 		this.receiver = receiver;
 	}
 
-	public void checkVersion(double version) {
+	/**
+	 * Checks the update server for updates.
+	 * 
+	 * @param clientVersion
+	 *            the currently installed gameclient version.
+	 * @param launcherVersion
+	 *            the currently installed launcher version.
+	 */
+	public void checkVersion(double clientVersion, double launcherVersion) {
 
-		Runnable r = new VersionCheckRunner(version);
+		Runnable r = new VersionCheckRunner(clientVersion, launcherVersion);
 		Thread t = new Thread(r);
 		t.setName("VersionCheckRunner");
 		t.start();
@@ -54,7 +62,8 @@ public class VersionChecker {
 		return doc;
 	}
 
-	private VersionInformation getServerVersion() throws UpdateException {
+	private VersionInformation getServerVersion() throws UpdateException,
+			NodeNotFoundException {
 		Document document;
 		try {
 			document = receiveVersionDocument();
@@ -75,6 +84,12 @@ public class VersionChecker {
 		} catch (NumberFormatException e) {
 			throw new UpdateException(e);
 		}
+
+		double launcherVersion;
+
+		launcherVersion = Double.parseDouble(getNodeValue(document,
+				"launcherVersion"));
+
 		String releaseDate = getNodeValue(document, "releaseDate");
 		String baseUrl = getNodeValue(document, "baseUrl");
 		DateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm");
@@ -139,26 +154,35 @@ public class VersionChecker {
 		}
 
 		VersionInformation info = new VersionInformation(version, fileSize,
-				release, baseUrl, files, deletes, configs);
+				release, baseUrl, files, deletes, configs, launcherVersion);
+
 		return info;
 	}
 
-	private String getNodeValue(Document document, String nodeName) {
-		return document.getDocumentElement().getElementsByTagName(nodeName)
-				.item(0).getFirstChild().getNodeValue();
+	private String getNodeValue(Document document, String nodeName)
+			throws NodeNotFoundException {
+		Node node = document.getDocumentElement()
+				.getElementsByTagName(nodeName).item(0);
+		if (node == null)
+			throw new NodeNotFoundException(nodeName);
+		return node.getFirstChild().getNodeValue();
 	}
 
 	private class VersionCheckRunner implements Runnable {
 
 		private final double clientVersion;
+		private final double launcherVersion;
 
-		public VersionCheckRunner(double version) {
-			clientVersion = version;
+		public VersionCheckRunner(double clientVersion, double launcherVersion) {
+			this.clientVersion = clientVersion;
+			this.launcherVersion = launcherVersion;
 		}
 
 		@Override
 		public void run() {
 			try {
+				// delay for testing on local network, so it does not complete
+				// "immediately".
 				Thread.sleep(500);
 			} catch (InterruptedException e) {
 				return;
@@ -166,12 +190,14 @@ public class VersionChecker {
 			VersionInformation serverVersion;
 			try {
 				serverVersion = getServerVersion();
-			} catch (UpdateException e) {
-				receiver.onUpdateError(e.getDetailException());
+			} catch (NodeNotFoundException | UpdateException e) {
+				receiver.onUpdateError(e);
 				return;
 			}
 
-			if (clientVersion < serverVersion.getVersion())
+			if (launcherVersion < serverVersion.getLauncherVersion())
+				receiver.onLauncherOutdated(serverVersion.getLauncherVersion());
+			else if (clientVersion < serverVersion.getVersion())
 				receiver.onUpdateRequired(serverVersion);
 			else
 				receiver.onNoUpdateRequired();

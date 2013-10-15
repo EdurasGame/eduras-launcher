@@ -6,5 +6,7 @@ public interface VersionCheckReceiver {
 
 	void onNoUpdateRequired();
 
+	void onLauncherOutdated(double newVersion);
+
 	void onUpdateError(Exception e);
 }

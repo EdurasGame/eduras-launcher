@@ -10,7 +10,13 @@ public class UpdateException extends Exception {
 		this.detailException = e;
 	}
 
-	public Exception getDetailException() {
-		return detailException;
+	@Override
+	public String getMessage() {
+		return detailException.getMessage();
+	}
+
+	@Override
+	public void printStackTrace() {
+		detailException.printStackTrace();
 	}
 }

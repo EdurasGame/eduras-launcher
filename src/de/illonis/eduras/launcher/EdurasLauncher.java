@@ -18,6 +18,8 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 		DownloadProgressListener, ExtractProgressListener,
 		RepairProgressListener {
 
+	public final static double LAUNCHER_VERSION = 1.0;
+
 	private final LauncherGui gui;
 	private VersionInformation updateInfo;
 	private ConfigParser config;
@@ -53,7 +55,7 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 
 		// compare local version with server version.
 		VersionChecker vc = new VersionChecker(this);
-		vc.checkVersion(getVersion());
+		vc.checkVersion(getVersion(), LAUNCHER_VERSION);
 	}
 
 	@Override
@@ -180,5 +182,21 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 	@Override
 	public void onRepairFailed() {
 		gui.setStatus("Repairing failed.");
+		gui.abortProgressBar();
+		gui.setButtonsEnabled(true);
+	}
+
+	@Override
+	public void onLauncherOutdated(double newVersion) {
+		gui.setButtonsEnabled(false);
+		gui.abortProgressBar();
+		JOptionPane.showMessageDialog(null,
+				"Your game launcher is outdated.\nPlease download version "
+						+ newVersion + " from the Eduras Website.",
+				"Game Launcher outdated", JOptionPane.ERROR_MESSAGE);
+		gui.setStatus("<html>Game Launcher outdated. <a href=\""
+				+ config.getValue("homepage")
+				+ "\">Go to Eduras Website</a></html>");
+
 	}
 }

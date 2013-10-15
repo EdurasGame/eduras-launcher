@@ -5,18 +5,19 @@ import java.util.LinkedList;
 
 public class VersionInformation {
 
-	private double version;
-	private long filesize;
+	private final double version;
+	private final long filesize;
 	private final Date releaseDate;
 	private final LinkedList<DownloadFile> files;
 	private final String baseUrl;
 	private final LinkedList<String> deleteFiles;
 	private final LinkedList<ConfigChange> configChanges;
+	private final double launcherVersion;
 
 	public VersionInformation(double version, long filesize, Date release,
 			String baseUrl, LinkedList<DownloadFile> newFiles,
 			LinkedList<String> deleteFiles,
-			LinkedList<ConfigChange> configChanges) {
+			LinkedList<ConfigChange> configChanges, double launcherVersion) {
 		this.version = version;
 		this.filesize = filesize;
 		this.releaseDate = release;
@@ -24,6 +25,7 @@ public class VersionInformation {
 		this.deleteFiles = new LinkedList<String>(deleteFiles);
 		this.baseUrl = baseUrl;
 		this.configChanges = new LinkedList<ConfigChange>(configChanges);
+		this.launcherVersion = launcherVersion;
 	}
 
 	public long getFilesize() {
@@ -56,5 +58,9 @@ public class VersionInformation {
 
 	public LinkedList<ConfigChange> getConfigChanges() {
 		return configChanges;
+	}
+
+	public double getLauncherVersion() {
+		return launcherVersion;
 	}
 }

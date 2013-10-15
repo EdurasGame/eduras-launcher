@@ -83,6 +83,7 @@ public class LauncherGui implements PropertyChangeListener {
 		if (progress == 0) {
 			updateBar.setIndeterminate(true);
 		} else {
+			updateBar.setString(null);
 			updateBar.setStringPainted(true);
 			updateBar.setIndeterminate(false);
 			updateBar.setValue(progress);
@@ -110,10 +111,21 @@ public class LauncherGui implements PropertyChangeListener {
 	}
 
 	public void setVersion(double version) {
-		versionLabel.setText("installed: " + version);
+		versionLabel
+				.setText("<html><center>installed versions:<br><font style=\"font-weight:lighter;\">launcher: "
+						+ EdurasLauncher.LAUNCHER_VERSION
+						+ ", gameclient: "
+						+ version + "</font></center></html>");
 	}
 
 	public void exit() {
 		frame.dispose();
+	}
+
+	public void abortProgressBar() {
+		updateBar.setIndeterminate(false);
+		updateBar.setValue(100);
+		updateBar.setStringPainted(true);
+		updateBar.setString("error");
 	}
 }

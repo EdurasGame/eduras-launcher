@@ -99,6 +99,10 @@ public class ConfigParser {
 	}
 
 	public Object getValue(String key) {
-		return otherConfigs.get(key);
+		Object val = otherConfigs.get(key);
+		if (val == null) {
+			return "!" + key + "!";
+		}
+		return val;
 	}
 }
