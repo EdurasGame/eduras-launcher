@@ -14,7 +14,6 @@ public class GameStarter extends Thread {
 
 	public GameStarter() {
 		setName("GameStarter");
-
 	}
 
 	@Override
@@ -22,7 +21,7 @@ public class GameStarter extends Thread {
 		ConfigParser config = new ConfigParser();
 		try {
 			config.load();
-		} catch (ParseException e1) {
+		} catch (ParseException e) {
 			return;
 		}
 
@@ -33,11 +32,13 @@ public class GameStarter extends Thread {
 					"java -jar " + path.getPath());
 
 			try {
+				// wait some time until game launched
 				Thread.sleep(3000);
 			} catch (InterruptedException e) {
-
+				return;
 			}
 
+			// check if game launch failed
 			InputStream err = proc.getErrorStream();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(
 					err));
@@ -51,6 +52,5 @@ public class GameStarter extends Thread {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 	}
 }

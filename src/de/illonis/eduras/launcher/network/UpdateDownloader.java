@@ -30,8 +30,6 @@ public class UpdateDownloader extends SwingWorker<Void, Void> {
 		LinkedList<DownloadFile> files = info.getFiles();
 
 		int n = files.size();
-		long max = info.getFilesize();
-		long done = 0;
 		progressValues = new int[n];
 
 		LinkedList<FileDownloader> downloaderList = new LinkedList<FileDownloader>();

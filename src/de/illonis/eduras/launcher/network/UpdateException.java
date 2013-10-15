@@ -2,7 +2,8 @@ package de.illonis.eduras.launcher.network;
 
 public class UpdateException extends Exception {
 
-	private Exception detailException;
+	private static final long serialVersionUID = 1L;
+	private final Exception detailException;
 
 	public UpdateException(Exception e) {
 		super(e.getMessage());
