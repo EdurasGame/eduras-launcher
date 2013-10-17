@@ -9,6 +9,8 @@ import javax.swing.JOptionPane;
 
 import de.illonis.eduras.launcher.gui.DownloadProgressListener;
 import de.illonis.eduras.launcher.gui.LauncherGui;
+import de.illonis.eduras.launcher.info.ChangeSet;
+import de.illonis.eduras.launcher.info.VersionNumber;
 import de.illonis.eduras.launcher.network.UpdateDownloader;
 import de.illonis.eduras.launcher.network.VersionCheckReceiver;
 import de.illonis.eduras.launcher.network.VersionChecker;
@@ -18,7 +20,8 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 		DownloadProgressListener, ExtractProgressListener,
 		RepairProgressListener {
 
-	public final static double LAUNCHER_VERSION = 1.0;
+	public final static VersionNumber LAUNCHER_VERSION = new VersionNumber(
+			"1.0");
 
 	private final LauncherGui gui;
 	private VersionInformation updateInfo;
@@ -61,9 +64,11 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 	@Override
 	public void onUpdateRequired(VersionInformation info) {
 		updateInfo = info;
+		ChangeSet updateSet = updateInfo.getChangeSetFor(config.getVersion());
+
 		gui.setStatus("new version " + info.getVersion() + " - downloading "
-				+ info.getNumFiles() + " file(s)");
-		UpdateDownloader downloader = new UpdateDownloader(info, this);
+				+ updateSet.getNumFiles() + " file(s)");
+		UpdateDownloader downloader = new UpdateDownloader(updateSet, this);
 		downloader.execute();
 	}
 
@@ -79,7 +84,7 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 		gui.setRepairButtonEnabled(true);
 	}
 
-	public double getVersion() {
+	public VersionNumber getVersion() {
 		return config.getVersion();
 	}
 
@@ -112,8 +117,9 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 
 	@Override
 	public void onDownloadFinished() {
+		ChangeSet updateSet = updateInfo.getChangeSetFor(config.getVersion());
 		gui.setStatus("Extracting files...");
-		UpdateExtractor ex = new UpdateExtractor(updateInfo, this);
+		UpdateExtractor ex = new UpdateExtractor(updateSet, this);
 		ex.execute();
 	}
 
@@ -187,7 +193,7 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 	}
 
 	@Override
-	public void onLauncherOutdated(double newVersion) {
+	public void onLauncherOutdated(VersionNumber newVersion) {
 		gui.setButtonsEnabled(false);
 		gui.abortProgressBar();
 		JOptionPane.showMessageDialog(null,

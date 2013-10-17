@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 
+import de.illonis.eduras.launcher.info.VersionNumber;
 import de.illonis.eduras.launcher.network.VersionChecker;
 import de.illonis.eduras.launcher.tools.PathFinder;
 
@@ -20,7 +21,7 @@ public class ConfigParser {
 	private final static String CONFIG_FILE = "config.ini";
 
 	// init default values
-	private double version = 0;
+	private VersionNumber version = new VersionNumber("0");
 	private final HashMap<String, Object> otherConfigs;
 
 	public ConfigParser() {
@@ -30,11 +31,11 @@ public class ConfigParser {
 		otherConfigs.put("metaServer", "eduras.jar");
 	}
 
-	void setVersion(double version) {
-		this.version = version;
+	void setVersion(VersionNumber versionNumber) {
+		this.version = versionNumber;
 	}
 
-	public double getVersion() {
+	public VersionNumber getVersion() {
 		return version;
 	}
 
@@ -77,7 +78,7 @@ public class ConfigParser {
 				switch (kv[0]) {
 				case "version":
 					try {
-						version = Double.parseDouble(kv[1]);
+						version = new VersionNumber(kv[1]);
 					} catch (NumberFormatException e) {
 						throw new ParseException(e);
 					}

@@ -3,64 +3,74 @@ package de.illonis.eduras.launcher.network;
 import java.util.Date;
 import java.util.LinkedList;
 
+import de.illonis.eduras.launcher.info.ChangeSet;
+import de.illonis.eduras.launcher.info.VersionNumber;
+
 public class VersionInformation {
 
-	private final double version;
-	private final long filesize;
+	private final VersionNumber version;
 	private final Date releaseDate;
-	private final LinkedList<DownloadFile> files;
-	private final String baseUrl;
-	private final LinkedList<String> deleteFiles;
-	private final LinkedList<ConfigChange> configChanges;
-	private final double launcherVersion;
+	private final VersionNumber launcherVersion;
+	private final LinkedList<ChangeSet> changeSets;
+	private final String metaServer;
+	private final String homepage;
+	private final String updateUrl;
+	private final String releaseName;
 
-	public VersionInformation(double version, long filesize, Date release,
-			String baseUrl, LinkedList<DownloadFile> newFiles,
-			LinkedList<String> deleteFiles,
-			LinkedList<ConfigChange> configChanges, double launcherVersion) {
+	public VersionInformation(VersionNumber version, Date release,
+			String metaServer, String homepage, String updateUrl,
+			String releaseName, VersionNumber launcherVersion,
+			LinkedList<ChangeSet> changeSets) {
 		this.version = version;
-		this.filesize = filesize;
 		this.releaseDate = release;
-		this.files = new LinkedList<DownloadFile>(newFiles);
-		this.deleteFiles = new LinkedList<String>(deleteFiles);
-		this.baseUrl = baseUrl;
-		this.configChanges = new LinkedList<ConfigChange>(configChanges);
+		this.changeSets = changeSets;
 		this.launcherVersion = launcherVersion;
-	}
-
-	public long getFilesize() {
-		return filesize;
-	}
-
-	public String getBaseUrl() {
-		return baseUrl;
+		this.metaServer = metaServer;
+		this.homepage = homepage;
+		this.updateUrl = updateUrl;
+		this.releaseName = releaseName;
 	}
 
 	public Date getReleaseDate() {
 		return releaseDate;
 	}
 
-	public double getVersion() {
+	public VersionNumber getVersion() {
 		return version;
 	}
 
-	public LinkedList<DownloadFile> getFiles() {
-		return new LinkedList<DownloadFile>(files);
-	}
-
-	public int getNumFiles() {
-		return files.size();
-	}
-
-	public LinkedList<String> getDeleteFiles() {
-		return new LinkedList<String>(deleteFiles);
-	}
-
-	public LinkedList<ConfigChange> getConfigChanges() {
-		return configChanges;
-	}
-
-	public double getLauncherVersion() {
+	public VersionNumber getLauncherVersion() {
 		return launcherVersion;
+	}
+
+	public LinkedList<ChangeSet> getChangeSets() {
+		return changeSets;
+	}
+
+	public ChangeSet getChangeSetFor(VersionNumber versionNumber) {
+		ChangeSet nullSet = null;
+		for (ChangeSet set : changeSets) {
+			if (set.getFrom().equals(versionNumber))
+				return set;
+			else if (set.getFrom().isNull())
+				nullSet = set;
+		}
+		return nullSet;
+	}
+
+	public String getHomepage() {
+		return homepage;
+	}
+
+	public String getMetaServer() {
+		return metaServer;
+	}
+
+	public String getReleaseName() {
+		return releaseName;
+	}
+
+	public String getUpdateUrl() {
+		return updateUrl;
 	}
 }

@@ -20,6 +20,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import de.illonis.eduras.launcher.ConfigParser;
+import de.illonis.eduras.launcher.info.ChangeSet;
+import de.illonis.eduras.launcher.info.VersionNumber;
 
 public class VersionChecker {
 	public final static String DEFAULT_VERSION_URL = "http://illonis.dyndns.org/eduras/update/version.xml";
@@ -38,7 +40,8 @@ public class VersionChecker {
 	 * @param launcherVersion
 	 *            the currently installed launcher version.
 	 */
-	public void checkVersion(double clientVersion, double launcherVersion) {
+	public void checkVersion(VersionNumber clientVersion,
+			VersionNumber launcherVersion) {
 
 		Runnable r = new VersionCheckRunner(clientVersion, launcherVersion);
 		Thread t = new Thread(r);
@@ -70,28 +73,32 @@ public class VersionChecker {
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			throw new UpdateException(e);
 		}
+		Element docElement = document.getDocumentElement();
 
-		double version;
+		VersionNumber version;
 		try {
-			version = Double.parseDouble(getNodeValue(document, "version"));
+			version = new VersionNumber(getNodeValue(docElement, "version"));
 		} catch (NumberFormatException e) {
 			throw new UpdateException(e);
 		}
 
-		long fileSize;
+		String homePage = getNodeValue(docElement, "homepage");
+		String releaseName = getNodeValue(docElement, "releaseName");
+		String metaserver = getNodeValue(docElement, "metaserver");
+		String updateUrl = getNodeValue(docElement, "updateUrl");
+
+		VersionNumber launcherVersion = null;
+
+		// TODO: change
 		try {
-			fileSize = Long.parseLong(getNodeValue(document, "fileSize"));
-		} catch (NumberFormatException e) {
-			throw new UpdateException(e);
+			launcherVersion = new VersionNumber(getNodeValue(docElement,
+					"launcher"));
+			// handle launcher
+		} catch (NodeNotFoundException e) {
+
 		}
 
-		double launcherVersion;
-
-		launcherVersion = Double.parseDouble(getNodeValue(document,
-				"launcherVersion"));
-
-		String releaseDate = getNodeValue(document, "releaseDate");
-		String baseUrl = getNodeValue(document, "baseUrl");
+		String releaseDate = getNodeValue(docElement, "releaseDate");
 		DateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		Date release;
 		try {
@@ -100,69 +107,96 @@ public class VersionChecker {
 			throw new UpdateException(e);
 		}
 
-		Node fileNode = document.getDocumentElement()
-				.getElementsByTagName("files").item(0);
-
-		NodeList fileNodes = fileNode.getChildNodes();
-
-		LinkedList<DownloadFile> files = new LinkedList<DownloadFile>();
-		for (int i = 0; i < fileNodes.getLength(); i++) {
-			Node n = fileNodes.item(i);
-			if (n instanceof Element) {
-				Element child = (Element) n;
-				if (n.getNodeName().equals("file")) {
-					String name = child.getFirstChild().getNodeValue();
-					long size = Long.parseLong(child.getAttribute("size"));
-					files.add(new DownloadFile(name, size));
-				}
-			}
-		}
-
-		Node deleteNode = document.getDocumentElement()
-				.getElementsByTagName("delete").item(0);
-
-		NodeList deleteNodes = deleteNode.getChildNodes();
-
-		LinkedList<String> deletes = new LinkedList<String>();
-		for (int i = 0; i < deleteNodes.getLength(); i++) {
-			Node n = deleteNodes.item(i);
-			if (n instanceof Element) {
-				Element child = (Element) n;
-				if (n.getNodeName().equals("file")) {
-					String name = child.getFirstChild().getNodeValue();
-					deletes.add(name);
-				}
-			}
-		}
-
-		Node configNode = document.getDocumentElement()
-				.getElementsByTagName("config").item(0);
-
-		NodeList configNodes = configNode.getChildNodes();
-
-		LinkedList<ConfigChange> configs = new LinkedList<ConfigChange>();
-		for (int i = 0; i < configNodes.getLength(); i++) {
-			Node n = configNodes.item(i);
-			if (n instanceof Element) {
-				Element child = (Element) n;
-				if (n.getNodeName().equals("option")) {
-					String value = child.getFirstChild().getNodeValue();
-					String key = child.getAttribute("key");
-					configs.add(new ConfigChange(key, value));
-				}
-			}
-		}
-
-		VersionInformation info = new VersionInformation(version, fileSize,
-				release, baseUrl, files, deletes, configs, launcherVersion);
+		VersionInformation info = new VersionInformation(version, release,
+				metaserver, homePage, updateUrl, releaseName, launcherVersion,
+				getChangeSets(docElement, version));
 
 		return info;
 	}
 
-	private String getNodeValue(Document document, String nodeName)
+	private LinkedList<ChangeSet> getChangeSets(Element docElement,
+			VersionNumber target) throws NodeNotFoundException, UpdateException {
+		ConfigParser p = new ConfigParser();
+		try {
+			p.load();
+		} catch (de.illonis.eduras.launcher.ParseException e1) {
+		}
+		LinkedList<ChangeSet> sets = new LinkedList<ChangeSet>();
+		NodeList changeSets = docElement.getElementsByTagName("changeset");
+		for (int i = 0; i < changeSets.getLength(); i++) {
+			Node n = changeSets.item(i);
+			if (n instanceof Element) {
+				System.out.println(n.getNodeName());
+				Element elem = (Element) n;
+
+				long fileSize;
+				try {
+					fileSize = Long.parseLong(getNodeValue(elem, "size"));
+				} catch (NumberFormatException e) {
+					throw new UpdateException(e);
+				}
+
+				String baseUrl = getNodeValue(elem, "baseUrl");
+				Node fileNode = elem.getElementsByTagName("files").item(0);
+				NodeList fileNodes = fileNode.getChildNodes();
+
+				LinkedList<DownloadFile> files = new LinkedList<DownloadFile>();
+				for (int j = 0; j < fileNodes.getLength(); j++) {
+					Node node = fileNodes.item(j);
+					if (node instanceof Element) {
+						Element child = (Element) node;
+						if (n.getNodeName().equals("file")) {
+							String name = child.getFirstChild().getNodeValue();
+							long size = Long.parseLong(child
+									.getAttribute("size"));
+							files.add(new DownloadFile(name, size));
+						}
+					}
+				}
+				Node deleteNode = elem.getElementsByTagName("delete").item(0);
+
+				NodeList deleteNodes = deleteNode.getChildNodes();
+
+				LinkedList<String> deletes = new LinkedList<String>();
+				for (i = 0; i < deleteNodes.getLength(); i++) {
+					Node delNode = deleteNodes.item(i);
+					if (delNode instanceof Element) {
+						Element child = (Element) delNode;
+						if (n.getNodeName().equals("file")) {
+							String name = child.getFirstChild().getNodeValue();
+							deletes.add(name);
+						}
+					}
+				}
+
+				Node configNode = elem.getElementsByTagName("config").item(0);
+
+				NodeList configNodes = configNode.getChildNodes();
+
+				LinkedList<ConfigChange> configs = new LinkedList<ConfigChange>();
+				for (i = 0; i < configNodes.getLength(); i++) {
+					Node cNode = configNodes.item(i);
+					if (cNode instanceof Element) {
+						Element child = (Element) cNode;
+						if (n.getNodeName().equals("option")) {
+							String value = child.getFirstChild().getNodeValue();
+							String key = child.getAttribute("key");
+							configs.add(new ConfigChange(key, value));
+						}
+					}
+				}
+				ChangeSet set = new ChangeSet(p.getVersion(), target, fileSize,
+						baseUrl, files, deletes, configs);
+				sets.add(set);
+			}
+
+		}
+		return sets;
+	}
+
+	private String getNodeValue(Element element, String nodeName)
 			throws NodeNotFoundException {
-		Node node = document.getDocumentElement()
-				.getElementsByTagName(nodeName).item(0);
+		Node node = element.getElementsByTagName(nodeName).item(0);
 		if (node == null)
 			throw new NodeNotFoundException(nodeName);
 		return node.getFirstChild().getNodeValue();
@@ -170,10 +204,11 @@ public class VersionChecker {
 
 	private class VersionCheckRunner implements Runnable {
 
-		private final double clientVersion;
-		private final double launcherVersion;
+		private final VersionNumber clientVersion;
+		private final VersionNumber launcherVersion;
 
-		public VersionCheckRunner(double clientVersion, double launcherVersion) {
+		public VersionCheckRunner(VersionNumber clientVersion,
+				VersionNumber launcherVersion) {
 			this.clientVersion = clientVersion;
 			this.launcherVersion = launcherVersion;
 		}
@@ -195,9 +230,11 @@ public class VersionChecker {
 				return;
 			}
 
-			if (launcherVersion < serverVersion.getLauncherVersion())
+			if (null != serverVersion.getLauncherVersion()
+					&& launcherVersion.compareTo(serverVersion
+							.getLauncherVersion()) < 0)
 				receiver.onLauncherOutdated(serverVersion.getLauncherVersion());
-			else if (clientVersion < serverVersion.getVersion())
+			else if (clientVersion.compareTo(serverVersion.getVersion()) < 0)
 				receiver.onUpdateRequired(serverVersion);
 			else
 				receiver.onNoUpdateRequired();

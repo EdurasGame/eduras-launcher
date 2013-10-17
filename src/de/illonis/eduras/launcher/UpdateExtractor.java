@@ -8,18 +8,17 @@ import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
 
+import de.illonis.eduras.launcher.info.ChangeSet;
 import de.illonis.eduras.launcher.network.ConfigChange;
-import de.illonis.eduras.launcher.network.VersionInformation;
 import de.illonis.eduras.launcher.tools.PathFinder;
 
 public class UpdateExtractor extends SwingWorker<Boolean, Void> {
 
 	private final ExtractProgressListener listener;
-	private final VersionInformation info;
+	private final ChangeSet info;
 	private String error = "";
 
-	public UpdateExtractor(VersionInformation info,
-			ExtractProgressListener listener) {
+	public UpdateExtractor(ChangeSet info, ExtractProgressListener listener) {
 		this.listener = listener;
 		this.info = info;
 	}
@@ -49,7 +48,7 @@ public class UpdateExtractor extends SwingWorker<Boolean, Void> {
 			config.load();
 		} catch (ParseException e1) {
 		}
-		config.setVersion(info.getVersion());
+		config.setVersion(info.getTarget());
 
 		for (ConfigChange change : info.getConfigChanges()) {
 			config.set(change.getKey(), change.getValue());

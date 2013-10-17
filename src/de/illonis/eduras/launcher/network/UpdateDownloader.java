@@ -8,18 +8,18 @@ import java.util.LinkedList;
 import javax.swing.SwingWorker;
 
 import de.illonis.eduras.launcher.gui.DownloadProgressListener;
+import de.illonis.eduras.launcher.info.ChangeSet;
 
 public class UpdateDownloader extends SwingWorker<Void, Void> {
 
 	private final DownloadProgressListener listener;
-	private final VersionInformation info;
+	private final ChangeSet set;
 	private int[] progressValues;
 	private String error;
 
-	public UpdateDownloader(VersionInformation info,
-			DownloadProgressListener listener) {
+	public UpdateDownloader(ChangeSet set, DownloadProgressListener listener) {
 		this.listener = listener;
-		this.info = info;
+		this.set = set;
 		addPropertyChangeListener(listener);
 	}
 
@@ -27,7 +27,7 @@ public class UpdateDownloader extends SwingWorker<Void, Void> {
 	protected Void doInBackground() throws Exception {
 		setProgress(0);
 
-		LinkedList<DownloadFile> files = info.getFiles();
+		LinkedList<DownloadFile> files = set.getFiles();
 
 		int n = files.size();
 		progressValues = new int[n];
@@ -37,7 +37,7 @@ public class UpdateDownloader extends SwingWorker<Void, Void> {
 		System.out.println("starting downloaders...");
 		for (int i = 0; i < files.size(); i++) {
 			DownloadFile f = files.get(i);
-			FileDownloader dl = new FileDownloader(f, info.getBaseUrl());
+			FileDownloader dl = new FileDownloader(f, set.getBaseUrl());
 			ChangeListener listener = new ChangeListener(i);
 			dl.addPropertyChangeListener(listener);
 			dl.execute();

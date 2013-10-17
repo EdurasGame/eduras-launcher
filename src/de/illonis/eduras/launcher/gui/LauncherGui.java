@@ -13,6 +13,7 @@ import javax.swing.JProgressBar;
 
 import de.illonis.eduras.launcher.EdurasLauncher;
 import de.illonis.eduras.launcher.gui.images.ImageFiler;
+import de.illonis.eduras.launcher.info.VersionNumber;
 
 public class LauncherGui implements PropertyChangeListener {
 
@@ -110,12 +111,12 @@ public class LauncherGui implements PropertyChangeListener {
 		startButton.requestFocus();
 	}
 
-	public void setVersion(double version) {
+	public void setVersion(VersionNumber versionNumber) {
 		versionLabel
 				.setText("<html><center>installed versions:<br><font style=\"font-weight:lighter;\">launcher: "
 						+ EdurasLauncher.LAUNCHER_VERSION
 						+ ", gameclient: "
-						+ version + "</font></center></html>");
+						+ versionNumber.toString() + "</font></center></html>");
 	}
 
 	public void exit() {
