@@ -22,13 +22,17 @@ public class ConfigParser {
 
 	// init default values
 	private VersionNumber version = new VersionNumber("0");
-	private final HashMap<String, Object> otherConfigs;
+	private final HashMap<String, String> otherConfigs;
+	private final static HashMap<String, String> CONFIG_DEFAULTS;
+	static {
+		CONFIG_DEFAULTS = new HashMap<String, String>();
+		CONFIG_DEFAULTS.put("gameJar", "eduras.jar");
+		CONFIG_DEFAULTS.put("updateUrl", VersionChecker.DEFAULT_VERSION_URL);
+		CONFIG_DEFAULTS.put("metaserver", "http://illonis.dyndns.org:4324");
+	}
 
 	public ConfigParser() {
-		otherConfigs = new HashMap<String, Object>();
-		otherConfigs.put("gameJar", "eduras.jar");
-		otherConfigs.put("updateUrl", VersionChecker.DEFAULT_VERSION_URL);
-		otherConfigs.put("metaServer", "eduras.jar");
+		otherConfigs = new HashMap<String, String>(CONFIG_DEFAULTS);
 	}
 
 	void setVersion(VersionNumber versionNumber) {
@@ -69,22 +73,27 @@ public class ConfigParser {
 	 * @throws ParseException
 	 */
 	public void load() throws ParseException {
+		otherConfigs.clear();
+		version = new VersionNumber("0");
+		otherConfigs.putAll(CONFIG_DEFAULTS);
 		try {
 			File f = new File(PathFinder.findFile(CONFIG_FILE));
 			BufferedReader reader = new BufferedReader(new FileReader(f));
 			String line;
 			while ((line = reader.readLine()) != null) {
 				String[] kv = line.split("=");
-				switch (kv[0]) {
+				String key = kv[0];
+				String val = (kv.length == 1) ? "" : kv[1];
+				switch (key) {
 				case "version":
 					try {
-						version = new VersionNumber(kv[1]);
+						version = new VersionNumber(val);
 					} catch (NumberFormatException e) {
 						throw new ParseException(e);
 					}
 					break;
 				default:
-					otherConfigs.put(kv[0], kv[1]);
+					otherConfigs.put(key, val);
 					break;
 				}
 			}
@@ -99,10 +108,10 @@ public class ConfigParser {
 		otherConfigs.put(key, value);
 	}
 
-	public Object getValue(String key) {
-		Object val = otherConfigs.get(key);
+	public String getValue(String key) {
+		String val = otherConfigs.get(key);
 		if (val == null) {
-			return "!" + key + "!";
+			return "";
 		}
 		return val;
 	}

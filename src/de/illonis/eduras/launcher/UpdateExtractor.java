@@ -43,18 +43,16 @@ public class UpdateExtractor extends SwingWorker<Boolean, Void> {
 
 		// change config
 
-		ConfigParser config = new ConfigParser();
-		try {
-			config.load();
-		} catch (ParseException e1) {
-		}
-		config.setVersion(info.getTarget());
+		EdurasLauncher.CONFIG.setVersion(info.getTarget());
 
 		for (ConfigChange change : info.getConfigChanges()) {
-			config.set(change.getKey(), change.getValue());
+			EdurasLauncher.CONFIG.set(change.getKey(), change.getValue());
 		}
+
+		EdurasLauncher.CONFIG
+				.set(EdurasLauncher.KEY_CLIENTNOTE, info.getNote());
 		try {
-			config.save();
+			EdurasLauncher.CONFIG.save();
 		} catch (IOException e) {
 			error = e.getMessage();
 			return false;

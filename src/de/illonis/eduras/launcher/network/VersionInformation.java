@@ -10,25 +10,27 @@ public class VersionInformation {
 
 	private final VersionNumber version;
 	private final Date releaseDate;
-	private final VersionNumber launcherVersion;
+	private final LauncherUpdateInfo launcherInfo;
 	private final LinkedList<ChangeSet> changeSets;
 	private final String metaServer;
 	private final String homepage;
 	private final String updateUrl;
 	private final String releaseName;
+	private final String gameJar;
 
 	public VersionInformation(VersionNumber version, Date release,
-			String metaServer, String homepage, String updateUrl,
-			String releaseName, VersionNumber launcherVersion,
-			LinkedList<ChangeSet> changeSets) {
+			String gameJar, String metaServer, String homepage,
+			String updateUrl, String releaseName,
+			LauncherUpdateInfo launcherVersion, LinkedList<ChangeSet> changeSets) {
 		this.version = version;
 		this.releaseDate = release;
 		this.changeSets = changeSets;
-		this.launcherVersion = launcherVersion;
+		this.launcherInfo = launcherVersion;
 		this.metaServer = metaServer;
 		this.homepage = homepage;
 		this.updateUrl = updateUrl;
 		this.releaseName = releaseName;
+		this.gameJar = gameJar;
 	}
 
 	public Date getReleaseDate() {
@@ -39,8 +41,8 @@ public class VersionInformation {
 		return version;
 	}
 
-	public VersionNumber getLauncherVersion() {
-		return launcherVersion;
+	public LauncherUpdateInfo getLauncherInfo() {
+		return launcherInfo;
 	}
 
 	public LinkedList<ChangeSet> getChangeSets() {
@@ -72,5 +74,9 @@ public class VersionInformation {
 
 	public String getUpdateUrl() {
 		return updateUrl;
+	}
+
+	public String getGameJar() {
+		return gameJar;
 	}
 }

@@ -19,14 +19,21 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import de.illonis.eduras.launcher.ConfigParser;
+import de.illonis.eduras.launcher.EdurasLauncher;
 import de.illonis.eduras.launcher.info.ChangeSet;
 import de.illonis.eduras.launcher.info.VersionNumber;
 
+/**
+ * Checks for new versions on server and updates urls to server.
+ * 
+ * @author illonis
+ * 
+ */
 public class VersionChecker {
 	public final static String DEFAULT_VERSION_URL = "http://illonis.dyndns.org/eduras/update/version.xml";
 
 	private final VersionCheckReceiver receiver;
+	private final DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
 	public VersionChecker(VersionCheckReceiver receiver) {
 		this.receiver = receiver;
@@ -53,15 +60,10 @@ public class VersionChecker {
 			throws ParserConfigurationException, MalformedURLException,
 			SAXException, IOException {
 
-		ConfigParser p = new ConfigParser();
-		try {
-			p.load();
-		} catch (de.illonis.eduras.launcher.ParseException e) {
-		}
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
-		Document doc = db.parse(new URL(p.getValue("updateUrl").toString())
-				.openStream());
+		Document doc = db.parse(new URL(EdurasLauncher.CONFIG.getValue(
+				"updateUrl").toString()).openStream());
 		return doc;
 	}
 
@@ -86,29 +88,48 @@ public class VersionChecker {
 		String releaseName = getNodeValue(docElement, "releaseName");
 		String metaserver = getNodeValue(docElement, "metaserver");
 		String updateUrl = getNodeValue(docElement, "updateUrl");
+		String gameJar = getNodeValue(docElement, "gameJar");
 
 		VersionNumber launcherVersion = null;
 
-		// TODO: change
+		LauncherUpdateInfo lui = new LauncherUpdateInfo();
 		try {
-			launcherVersion = new VersionNumber(getNodeValue(docElement,
-					"launcher"));
-			// handle launcher
-		} catch (NodeNotFoundException e) {
+			NodeList launcherData = docElement.getElementsByTagName("launcher");
+			Node launcherNode = launcherData.item(0);
+			if (launcherNode instanceof Element) {
+				Element e = (Element) launcherNode;
+				String launcherName = getNodeValue(e, "name");
+				String updater = getNodeValue(e, "updater");
+				String note;
+				try {
+					note = getNodeValue(e, "note");
+				} catch (NodeNotFoundException ne) {
+					note = "";
+				}
 
+				long size = Long.parseLong(getNodeValue(e, "size"));
+				long updatersize = Long
+						.parseLong(getNodeValue(e, "updatersize"));
+				String baseUrl = getNodeValue(e, "baseUrl");
+
+				launcherVersion = new VersionNumber(getNodeValue(e, "version"));
+				lui = new LauncherUpdateInfo(note, launcherVersion, updater,
+						baseUrl, launcherName, size, updatersize);
+			}
+		} catch (NodeNotFoundException e) {
 		}
 
 		String releaseDate = getNodeValue(docElement, "releaseDate");
-		DateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
 		Date release;
 		try {
-			release = f.parse(releaseDate);
+			release = format.parse(releaseDate);
 		} catch (ParseException e) {
 			throw new UpdateException(e);
 		}
 
 		VersionInformation info = new VersionInformation(version, release,
-				metaserver, homePage, updateUrl, releaseName, launcherVersion,
+				gameJar, metaserver, homePage, updateUrl, releaseName, lui,
 				getChangeSets(docElement, version));
 
 		return info;
@@ -116,17 +137,12 @@ public class VersionChecker {
 
 	private LinkedList<ChangeSet> getChangeSets(Element docElement,
 			VersionNumber target) throws NodeNotFoundException, UpdateException {
-		ConfigParser p = new ConfigParser();
-		try {
-			p.load();
-		} catch (de.illonis.eduras.launcher.ParseException e1) {
-		}
+
 		LinkedList<ChangeSet> sets = new LinkedList<ChangeSet>();
 		NodeList changeSets = docElement.getElementsByTagName("changeset");
 		for (int i = 0; i < changeSets.getLength(); i++) {
 			Node n = changeSets.item(i);
 			if (n instanceof Element) {
-				System.out.println(n.getNodeName());
 				Element elem = (Element) n;
 
 				long fileSize;
@@ -145,7 +161,7 @@ public class VersionChecker {
 					Node node = fileNodes.item(j);
 					if (node instanceof Element) {
 						Element child = (Element) node;
-						if (n.getNodeName().equals("file")) {
+						if (child.getNodeName().equals("file")) {
 							String name = child.getFirstChild().getNodeValue();
 							long size = Long.parseLong(child
 									.getAttribute("size"));
@@ -155,37 +171,49 @@ public class VersionChecker {
 				}
 				Node deleteNode = elem.getElementsByTagName("delete").item(0);
 
-				NodeList deleteNodes = deleteNode.getChildNodes();
-
 				LinkedList<String> deletes = new LinkedList<String>();
-				for (i = 0; i < deleteNodes.getLength(); i++) {
-					Node delNode = deleteNodes.item(i);
-					if (delNode instanceof Element) {
-						Element child = (Element) delNode;
-						if (n.getNodeName().equals("file")) {
-							String name = child.getFirstChild().getNodeValue();
-							deletes.add(name);
+				if (deleteNode != null) {
+					NodeList deleteNodes = deleteNode.getChildNodes();
+
+					for (i = 0; i < deleteNodes.getLength(); i++) {
+						Node delNode = deleteNodes.item(i);
+						if (delNode instanceof Element) {
+							Element child = (Element) delNode;
+							if (child.getNodeName().equals("file")) {
+								String name = child.getFirstChild()
+										.getNodeValue();
+								deletes.add(name);
+							}
 						}
 					}
 				}
+				LinkedList<ConfigChange> configs = new LinkedList<ConfigChange>();
 
 				Node configNode = elem.getElementsByTagName("config").item(0);
+				if (configNode != null) {
+					NodeList configNodes = configNode.getChildNodes();
 
-				NodeList configNodes = configNode.getChildNodes();
-
-				LinkedList<ConfigChange> configs = new LinkedList<ConfigChange>();
-				for (i = 0; i < configNodes.getLength(); i++) {
-					Node cNode = configNodes.item(i);
-					if (cNode instanceof Element) {
-						Element child = (Element) cNode;
-						if (n.getNodeName().equals("option")) {
-							String value = child.getFirstChild().getNodeValue();
-							String key = child.getAttribute("key");
-							configs.add(new ConfigChange(key, value));
+					for (i = 0; i < configNodes.getLength(); i++) {
+						Node cNode = configNodes.item(i);
+						if (cNode instanceof Element) {
+							Element child = (Element) cNode;
+							if (child.getNodeName().equals("option")) {
+								String value = child.getFirstChild()
+										.getNodeValue();
+								String key = child.getAttribute("key");
+								configs.add(new ConfigChange(key, value));
+							}
 						}
 					}
 				}
-				ChangeSet set = new ChangeSet(p.getVersion(), target, fileSize,
+				String note;
+				try {
+					note = getNodeValue(elem, "note");
+				} catch (NodeNotFoundException ne) {
+					note = "";
+				}
+				ChangeSet set = new ChangeSet(note,
+						EdurasLauncher.CONFIG.getVersion(), target, fileSize,
 						baseUrl, files, deletes, configs);
 				sets.add(set);
 			}
@@ -199,7 +227,11 @@ public class VersionChecker {
 		Node node = element.getElementsByTagName(nodeName).item(0);
 		if (node == null)
 			throw new NodeNotFoundException(nodeName);
-		return node.getFirstChild().getNodeValue();
+		try {
+			return node.getFirstChild().getNodeValue();
+		} catch (NullPointerException nl) {
+			throw new NodeNotFoundException(nodeName);
+		}
 	}
 
 	private class VersionCheckRunner implements Runnable {
@@ -230,15 +262,31 @@ public class VersionChecker {
 				return;
 			}
 
-			if (null != serverVersion.getLauncherVersion()
+			updateBasics(serverVersion);
+
+			if (null != serverVersion.getLauncherInfo()
 					&& launcherVersion.compareTo(serverVersion
-							.getLauncherVersion()) < 0)
-				receiver.onLauncherOutdated(serverVersion.getLauncherVersion());
+							.getLauncherInfo().getVersion()) < 0)
+				receiver.onLauncherOutdated(serverVersion.getLauncherInfo());
 			else if (clientVersion.compareTo(serverVersion.getVersion()) < 0)
 				receiver.onUpdateRequired(serverVersion);
 			else
-				receiver.onNoUpdateRequired();
+				receiver.onNoUpdateRequired(serverVersion);
 
+		}
+
+		private void updateBasics(VersionInformation serverVersion) {
+			EdurasLauncher.CONFIG.set("gameJar", serverVersion.getGameJar());
+			EdurasLauncher.CONFIG.set("metaserver",
+					serverVersion.getMetaServer());
+			EdurasLauncher.CONFIG.set("homepage", serverVersion.getHomepage());
+			EdurasLauncher.CONFIG
+					.set("updateUrl", serverVersion.getUpdateUrl());
+			EdurasLauncher.CONFIG.set("releaseDate",
+					format.format(serverVersion.getReleaseDate()));
+
+			EdurasLauncher.CONFIG.set("releaseName",
+					serverVersion.getReleaseName());
 		}
 	}
 

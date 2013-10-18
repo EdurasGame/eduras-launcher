@@ -3,32 +3,44 @@ package de.illonis.eduras.launcher;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
+import java.io.File;
+import java.io.IOException;
 
 import javax.swing.JButton;
-import javax.swing.JOptionPane;
 
 import de.illonis.eduras.launcher.gui.DownloadProgressListener;
 import de.illonis.eduras.launcher.gui.LauncherGui;
 import de.illonis.eduras.launcher.info.ChangeSet;
 import de.illonis.eduras.launcher.info.VersionNumber;
+import de.illonis.eduras.launcher.network.LauncherUpdateDownloader;
+import de.illonis.eduras.launcher.network.LauncherUpdateInfo;
+import de.illonis.eduras.launcher.network.LauncherUpdateListener;
 import de.illonis.eduras.launcher.network.UpdateDownloader;
 import de.illonis.eduras.launcher.network.VersionCheckReceiver;
 import de.illonis.eduras.launcher.network.VersionChecker;
 import de.illonis.eduras.launcher.network.VersionInformation;
+import de.illonis.eduras.launcher.tools.PathFinder;
 
 public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 		DownloadProgressListener, ExtractProgressListener,
-		RepairProgressListener {
+		LauncherUpdateListener, RepairProgressListener {
 
 	public final static VersionNumber LAUNCHER_VERSION = new VersionNumber(
-			"1.0");
+			"2.1.10");
+	public final static ConfigParser CONFIG = new ConfigParser();
+	public final static String KEY_LAUNCHERNOTE = "launchernote";
+	public final static String KEY_CLIENTNOTE = "clientnote";
 
 	private final LauncherGui gui;
 	private VersionInformation updateInfo;
-	private ConfigParser config;
 
 	public static void main(String[] args) {
 		System.out.println("launched");
+		System.out.println("Launcher v " + LAUNCHER_VERSION);
+		try {
+			CONFIG.load();
+		} catch (ParseException e) {
+		}
 		EdurasLauncher launcher = new EdurasLauncher();
 		launcher.startAndShowGui();
 	}
@@ -45,13 +57,18 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 
 	private void checkLocal() {
 		// read local version
-
-		config = new ConfigParser();
-		try {
-			config.load();
-		} catch (ParseException e) {
-		}
 		gui.setVersion(getVersion());
+
+		String val = CONFIG.getValue(KEY_LAUNCHERNOTE);
+		if (!val.isEmpty()) {
+			gui.showMessage("Launcher updated", val);
+			CONFIG.set(KEY_LAUNCHERNOTE, "");
+			try {
+				CONFIG.save();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	private void check() {
@@ -64,7 +81,7 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 	@Override
 	public void onUpdateRequired(VersionInformation info) {
 		updateInfo = info;
-		ChangeSet updateSet = updateInfo.getChangeSetFor(config.getVersion());
+		ChangeSet updateSet = updateInfo.getChangeSetFor(CONFIG.getVersion());
 
 		gui.setStatus("new version " + info.getVersion() + " - downloading "
 				+ updateSet.getNumFiles() + " file(s)");
@@ -73,19 +90,25 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 	}
 
 	@Override
-	public void onNoUpdateRequired() {
+	public void onNoUpdateRequired(VersionInformation info) {
 		gui.setStatus("No update required.");
+		String updater = info.getLauncherInfo().getUpdaterName();
+		if (!updater.isEmpty()) {
+			File f = new File(PathFinder.findFile(updater));
+			f.delete();
+		}
 		gui.ready();
 	}
 
 	@Override
 	public void onUpdateError(Exception e) {
 		gui.setStatus("Update error: " + e.getMessage());
+		e.printStackTrace();
 		gui.setRepairButtonEnabled(true);
 	}
 
 	public VersionNumber getVersion() {
-		return config.getVersion();
+		return CONFIG.getVersion();
 	}
 
 	@Override
@@ -117,7 +140,7 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 
 	@Override
 	public void onDownloadFinished() {
-		ChangeSet updateSet = updateInfo.getChangeSetFor(config.getVersion());
+		ChangeSet updateSet = updateInfo.getChangeSetFor(CONFIG.getVersion());
 		gui.setStatus("Extracting files...");
 		UpdateExtractor ex = new UpdateExtractor(updateSet, this);
 		ex.execute();
@@ -125,9 +148,8 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 
 	@Override
 	public void onDownloadError(String msg) {
-		JOptionPane.showMessageDialog(null, "Error while updating.\n"
-				+ "Try again later or redownload Eduras manually.\n\n" + msg,
-				"Download error", JOptionPane.ERROR_MESSAGE);
+		gui.showMessage("Download error", "Error while updating.\n"
+				+ "Try again later or redownload Eduras manually.\n\n" + msg);
 		gui.setStatus("An error occured while updating: " + msg);
 		gui.setRepairButtonEnabled(true);
 	}
@@ -138,6 +160,16 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 		if (getVersion() == updateInfo.getVersion()) {
 			gui.setStatus("Update completed.");
 			gui.ready();
+			String val = CONFIG.getValue(KEY_CLIENTNOTE);
+			if (!val.isEmpty()) {
+				gui.showMessage("Client updated", val);
+				CONFIG.set(KEY_CLIENTNOTE, "");
+				try {
+					CONFIG.save();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 			updateInfo = null;
 		} else {
 			check();
@@ -159,7 +191,10 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 
 		@Override
 		public void run() {
-			GameStarter starter = new GameStarter();
+			Object jarObj = EdurasLauncher.CONFIG.getValue("gameJar");
+			if (jarObj == null)
+				return;
+			GameStarter starter = new GameStarter(jarObj.toString());
 			starter.start();
 			try {
 				starter.join();
@@ -172,14 +207,17 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 
 	@Override
 	public void onExtractingFailed(String msg) {
-		JOptionPane.showMessageDialog(null, "Error while updating.\n"
-				+ "Make sure your game folder is writable.\n\n" + msg,
-				"Extraction error", JOptionPane.ERROR_MESSAGE);
+		gui.showMessage("Extraction error", "Error while updating.\n"
+				+ "Make sure your game folder is writable.\n\n" + msg);
 		gui.setStatus("An error occured while extracting: " + msg);
 	}
 
 	@Override
 	public void onRepairCompleted() {
+		try {
+			CONFIG.load();
+		} catch (ParseException e) {
+		}
 		gui.setStatus("Redownloading files...");
 		checkLocal();
 		check();
@@ -193,16 +231,24 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 	}
 
 	@Override
-	public void onLauncherOutdated(VersionNumber newVersion) {
-		gui.setButtonsEnabled(false);
-		gui.abortProgressBar();
-		JOptionPane.showMessageDialog(null,
-				"Your game launcher is outdated.\nPlease download version "
-						+ newVersion + " from the Eduras Website.",
-				"Game Launcher outdated", JOptionPane.ERROR_MESSAGE);
-		gui.setStatus("<html>Game Launcher outdated. <a href=\""
-				+ config.getValue("homepage")
-				+ "\">Go to Eduras Website</a></html>");
+	public void onLauncherOutdated(LauncherUpdateInfo newVersion) {
 
+		gui.setButtonsEnabled(false);
+		gui.setStatus("Updating game launcher...");
+		CONFIG.set(KEY_LAUNCHERNOTE, newVersion.getNote());
+		try {
+			CONFIG.save();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		LauncherUpdateDownloader l = new LauncherUpdateDownloader(this,
+				newVersion);
+		l.execute();
+	}
+
+	@Override
+	public void exitLauncher() {
+		gui.setStatus("Restarting launcher...");
+		gui.exit();
 	}
 }

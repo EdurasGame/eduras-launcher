@@ -8,6 +8,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
@@ -112,11 +113,7 @@ public class LauncherGui implements PropertyChangeListener {
 	}
 
 	public void setVersion(VersionNumber versionNumber) {
-		versionLabel
-				.setText("<html><center>installed versions:<br><font style=\"font-weight:lighter;\">launcher: "
-						+ EdurasLauncher.LAUNCHER_VERSION
-						+ ", gameclient: "
-						+ versionNumber.toString() + "</font></center></html>");
+		versionLabel.setText("version " + versionNumber.toString());
 	}
 
 	public void exit() {
@@ -128,5 +125,16 @@ public class LauncherGui implements PropertyChangeListener {
 		updateBar.setValue(100);
 		updateBar.setStringPainted(true);
 		updateBar.setString("error");
+	}
+
+	public void showMessage(String title, String message) {
+		JOptionPane.showMessageDialog(frame, message, title,
+				JOptionPane.INFORMATION_MESSAGE);
+	}
+
+	public void showError(String title, String message) {
+		JOptionPane.showMessageDialog(frame, message, title,
+				JOptionPane.ERROR_MESSAGE);
+
 	}
 }

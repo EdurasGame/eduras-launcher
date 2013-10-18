@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.util.LinkedList;
 
 import javax.swing.JOptionPane;
 
@@ -12,24 +13,31 @@ import de.illonis.eduras.launcher.tools.PathFinder;
 
 public class GameStarter extends Thread {
 
-	public GameStarter() {
-		setName("GameStarter");
+	private final String jarFile;
+	private LinkedList<String> args = new LinkedList<String>();
+
+	public GameStarter(String jarFile) {
+		super("GameStarter");
+		this.jarFile = jarFile;
+	}
+
+	public void setArguments(String... args) {
+		for (int i = 0; i < args.length; i++) {
+			this.args.add(args[i]);
+		}
 	}
 
 	@Override
 	public void run() {
-		ConfigParser config = new ConfigParser();
-		try {
-			config.load();
-		} catch (ParseException e) {
-			return;
+		URI path = PathFinder.findFile(jarFile);
+
+		String execString = "java -jar " + path.getPath();
+		for (String arg : args) {
+			execString += " " + arg;
 		}
 
-		URI path = PathFinder.findFile(config.getValue("gameJar").toString());
-
 		try {
-			Process proc = Runtime.getRuntime().exec(
-					"java -jar " + path.getPath());
+			Process proc = Runtime.getRuntime().exec(execString);
 
 			try {
 				// wait some time until game launched

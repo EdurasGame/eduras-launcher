@@ -22,11 +22,18 @@ public class FileDownloader extends SwingWorker<Void, Void> {
 	private boolean ok = false;
 	private Exception error;
 
+	public FileDownloader(DownloadFile f, String baseUrl, String newFileName)
+			throws MalformedURLException {
+		System.out.println(f.getFileName());
+		source = new URL(baseUrl + f.getFileName());
+		target = PathFinder.findFile(newFileName);
+		fileSize = f.getFileSize();
+	}
+
 	public FileDownloader(DownloadFile f, String baseUrl)
 			throws MalformedURLException {
-		source = new URL(baseUrl + f.getFileName());
-		target = PathFinder.findFile(f.getFileName());
-		fileSize = f.getFileSize();
+		this(f, baseUrl, f.getFileName());
+
 	}
 
 	@Override
