@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Date;
 import java.util.HashMap;
 
 import de.illonis.eduras.launcher.EdurasLauncher.ReleaseChannel;
@@ -101,6 +102,15 @@ public class ConfigParser {
 					otherConfigs.put(key, val);
 					break;
 				}
+			}
+			Date d;
+			try {
+				d = VersionChecker.DATE_FORMAT.parse(getValue("releaseDate",
+						"0"));
+
+				version.setReleaseDate(d);
+			} catch (java.text.ParseException e) {
+				e.printStackTrace();
 			}
 
 			reader.close();

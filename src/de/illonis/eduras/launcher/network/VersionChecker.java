@@ -36,7 +36,8 @@ public class VersionChecker {
 	public final static String BETA_VERSION_URL = "http://illonis.dyndns.org/eduras/update/beta.xml";
 
 	private final VersionCheckReceiver receiver;
-	private final DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+	public final static DateFormat DATE_FORMAT = new SimpleDateFormat(
+			"yyyy-MM-dd HH:mm");
 
 	public VersionChecker(VersionCheckReceiver receiver) {
 		this.receiver = receiver;
@@ -95,13 +96,6 @@ public class VersionChecker {
 		}
 		Element docElement = document.getDocumentElement();
 
-		VersionNumber version;
-		try {
-			version = new VersionNumber(getNodeValue(docElement, "version"));
-		} catch (NumberFormatException e) {
-			throw new UpdateException(e);
-		}
-
 		String homePage = getNodeValue(docElement, "homepage");
 		String releaseName = getNodeValue(docElement, "releaseName");
 		String metaserver = getNodeValue(docElement, "metaserver");
@@ -141,8 +135,15 @@ public class VersionChecker {
 
 		Date release;
 		try {
-			release = format.parse(releaseDate);
+			release = DATE_FORMAT.parse(releaseDate);
 		} catch (ParseException e) {
+			throw new UpdateException(e);
+		}
+		VersionNumber version;
+		try {
+			version = new VersionNumber(getNodeValue(docElement, "version"),
+					release);
+		} catch (NumberFormatException e) {
 			throw new UpdateException(e);
 		}
 
@@ -288,7 +289,14 @@ public class VersionChecker {
 					&& launcherVersion.compareTo(serverVersion
 							.getLauncherInfo().getVersion()) < 0)
 				receiver.onLauncherOutdated(serverVersion.getLauncherInfo());
-			else if (clientVersion.compareTo(serverVersion.getVersion()) < 0)
+			else if (channel == ReleaseChannel.NIGHTLY) {
+				if (clientVersion.getReleaseDate().before(
+						serverVersion.getReleaseDate())) {
+					receiver.onUpdateRequired(serverVersion);
+				} else {
+					receiver.onNoUpdateRequired(serverVersion);
+				}
+			} else if (clientVersion.compareTo(serverVersion.getVersion()) < 0)
 				receiver.onUpdateRequired(serverVersion);
 			else
 				receiver.onNoUpdateRequired(serverVersion);
@@ -303,7 +311,7 @@ public class VersionChecker {
 			EdurasLauncher.CONFIG
 					.set("updateUrl", serverVersion.getUpdateUrl());
 			EdurasLauncher.CONFIG.set("releaseDate",
-					format.format(serverVersion.getReleaseDate()));
+					DATE_FORMAT.format(serverVersion.getReleaseDate()));
 
 			EdurasLauncher.CONFIG.set("releaseName",
 					serverVersion.getReleaseName());

@@ -68,10 +68,11 @@ public class LauncherGui implements PropertyChangeListener {
 
 		JPanel configPanel = new JPanel(new BorderLayout());
 		releaseSelect = new JComboBox<ReleaseChannel>(ReleaseChannel.values());
-		releaseSelect.addActionListener(launcher);
 		configPanel.add(releaseSelect, BorderLayout.EAST);
 		releaseSelect
 				.setSelectedItem(EdurasLauncher.CONFIG.getReleaseChannel());
+
+		releaseSelect.addActionListener(launcher);
 
 		JPanel topPanel = new JPanel(new BorderLayout());
 		topPanel.add(configPanel, BorderLayout.NORTH);

@@ -1,5 +1,7 @@
 package de.illonis.eduras.launcher.info;
 
+import java.util.Date;
+
 /**
  * Represents a version number.<br>
  * <p>
@@ -25,6 +27,7 @@ package de.illonis.eduras.launcher.info;
 public class VersionNumber implements Comparable<VersionNumber> {
 
 	private final static int MAX_NUMBERS = 3;
+	private Date releaseDate;
 
 	private int[] numbers;
 
@@ -39,6 +42,15 @@ public class VersionNumber implements Comparable<VersionNumber> {
 	public VersionNumber(String stringValue) {
 		numbers = new int[MAX_NUMBERS];
 		parseString(stringValue);
+	}
+
+	public VersionNumber(String stringValue, Date releaseDate) {
+		this(stringValue);
+		this.releaseDate = releaseDate;
+	}
+
+	public Date getReleaseDate() {
+		return releaseDate;
 	}
 
 	private void parseString(String stringValue) {
@@ -82,6 +94,10 @@ public class VersionNumber implements Comparable<VersionNumber> {
 			}
 		}
 		return string;
+	}
+
+	public void setReleaseDate(Date releaseDate) {
+		this.releaseDate = releaseDate;
 	}
 
 	@Override

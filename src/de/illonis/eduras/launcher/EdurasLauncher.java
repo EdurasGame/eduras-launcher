@@ -83,7 +83,7 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 	}
 
 	private void check() {
-
+		gui.setButtonsEnabled(false);
 		// compare local version with server version.
 		VersionChecker vc = new VersionChecker(this);
 		vc.checkVersion(getVersion(), LAUNCHER_VERSION, releaseChannel);
@@ -108,6 +108,7 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 			File f = new File(PathFinder.findFile(updater));
 			f.delete();
 		}
+		checkLocal();
 		gui.ready();
 	}
 
