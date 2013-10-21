@@ -34,7 +34,8 @@ public class DonePanel extends JPanel implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		GameStarter s = new GameStarter(target.toString());
+
+		GameStarter s = new GameStarter(target.toUri());
 		s.start();
 		startButton.setText("Starting...");
 		startButton.setEnabled(false);

@@ -22,8 +22,12 @@ public class PathFinder {
 	 */
 	public static URL getBaseDir() {
 		try {
-			URI uri = PathFinder.class.getProtectionDomain().getCodeSource()
-					.getLocation().toURI();
+			URI uri = ClassLoader.getSystemClassLoader().getResource(".")
+					.toURI();
+			// URI uri =
+			// PathFinder.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+
+			// (PathFinder.class.getProtectionDomain().getCodeSource().getLocation().getPath());
 			URI parent = uri.resolve(".");
 			return parent.toURL();
 		} catch (URISyntaxException | MalformedURLException e) {

@@ -1,6 +1,7 @@
 package de.illonis.eduras.launcher;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -13,12 +14,18 @@ import de.illonis.eduras.launcher.tools.PathFinder;
 
 public class GameStarter extends Thread {
 
-	private final String jarFile;
+	private String execString;
 	private LinkedList<String> args = new LinkedList<String>();
 
-	public GameStarter(String jarFile) {
+	public GameStarter(URI jarFile) {
+		String path = new File(jarFile).getAbsolutePath();
+		execString = "java -jar " + path;
+	}
+
+	public GameStarter(String targetName) {
 		super("GameStarter");
-		this.jarFile = jarFile;
+		URI uri = PathFinder.findFile(targetName);
+		execString = "java -jar " + new File(uri).getAbsolutePath();
 	}
 
 	public void setArguments(String... args) {
@@ -29,15 +36,14 @@ public class GameStarter extends Thread {
 
 	@Override
 	public void run() {
-		URI path = PathFinder.findFile(jarFile);
-
-		String execString = "java -jar " + path.getPath();
+		String cmd = execString;
 		for (String arg : args) {
-			execString += " " + arg;
+			cmd += " " + arg;
 		}
 
 		try {
-			Process proc = Runtime.getRuntime().exec(execString);
+			System.out.println("executing: " + cmd);
+			Process proc = Runtime.getRuntime().exec(cmd);
 
 			try {
 				// wait some time until game launched

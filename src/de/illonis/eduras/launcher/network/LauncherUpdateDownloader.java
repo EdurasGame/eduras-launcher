@@ -54,7 +54,9 @@ public class LauncherUpdateDownloader extends SwingWorker<Void, Void> {
 	protected void done() {
 
 		l.exitLauncher();
-		GameStarter st = new GameStarter(info.getUpdaterName());
+		String updater = info.getUpdaterName();
+
+		GameStarter st = new GameStarter(updater);
 		st.setArguments(info.getDownloadName(), info.getDownloadName() + ".new");
 		st.start();
 	}

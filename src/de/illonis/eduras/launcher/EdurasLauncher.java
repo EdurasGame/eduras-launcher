@@ -5,6 +5,8 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -35,7 +37,7 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 	}
 
 	public final static VersionNumber LAUNCHER_VERSION = new VersionNumber(
-			"2.2");
+			"2.2.2");
 	public final static ConfigParser CONFIG = new ConfigParser();
 	public final static String KEY_LAUNCHERNOTE = "launchernote";
 	public final static String KEY_CLIENTNOTE = "clientnote";
@@ -225,13 +227,23 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 			Object jarObj = EdurasLauncher.CONFIG.getValue("gameJar");
 			if (jarObj == null)
 				return;
-			GameStarter starter = new GameStarter(jarObj.toString());
-			starter.start();
+
+			String s = jarObj.toString();
+			URI u;
 			try {
-				starter.join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+				u = new URI(s);
+
+				GameStarter starter = new GameStarter(u);
+				starter.start();
+				try {
+					starter.join();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			} catch (URISyntaxException e1) {
+				e1.printStackTrace();
 			}
+
 			gui.exit();
 		}
 	}
