@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 
+import de.illonis.eduras.launcher.EdurasLauncher.ReleaseChannel;
 import de.illonis.eduras.launcher.info.VersionNumber;
 import de.illonis.eduras.launcher.network.VersionChecker;
 import de.illonis.eduras.launcher.tools.PathFinder;
@@ -19,6 +20,7 @@ import de.illonis.eduras.launcher.tools.PathFinder;
  */
 public class ConfigParser {
 	private final static String CONFIG_FILE = "config.ini";
+	private final static String KEY_RELEASE_CHANNEL = "releaseChannel";
 
 	// init default values
 	private VersionNumber version = new VersionNumber("0");
@@ -27,7 +29,10 @@ public class ConfigParser {
 	static {
 		CONFIG_DEFAULTS = new HashMap<String, String>();
 		CONFIG_DEFAULTS.put("gameJar", "eduras.jar");
-		CONFIG_DEFAULTS.put("updateUrl", VersionChecker.DEFAULT_VERSION_URL);
+		CONFIG_DEFAULTS.put("updateUrl", VersionChecker.STABLE_VERSION_URL);
+		CONFIG_DEFAULTS.put("nightlyUrl", VersionChecker.NIGHTLY_VERSION_URL);
+		CONFIG_DEFAULTS.put("betaUrl", VersionChecker.BETA_VERSION_URL);
+		CONFIG_DEFAULTS.put(KEY_RELEASE_CHANNEL, ReleaseChannel.STABLE.name());
 		CONFIG_DEFAULTS.put("metaserver", "http://illonis.dyndns.org:4324");
 	}
 
@@ -108,11 +113,26 @@ public class ConfigParser {
 		otherConfigs.put(key, value);
 	}
 
+	public String getValue(String key, String defaultValue) {
+		String val = getValue(key);
+		if (val.equals("-"))
+			return defaultValue;
+		return val;
+	}
+
 	public String getValue(String key) {
 		String val = otherConfigs.get(key);
 		if (val == null) {
-			return "";
+			return "-";
 		}
 		return val;
+	}
+
+	public void setRelease(ReleaseChannel type) {
+		otherConfigs.put(KEY_RELEASE_CHANNEL, type.name());
+	}
+
+	public ReleaseChannel getReleaseChannel() {
+		return ReleaseChannel.valueOf(otherConfigs.get(KEY_RELEASE_CHANNEL));
 	}
 }

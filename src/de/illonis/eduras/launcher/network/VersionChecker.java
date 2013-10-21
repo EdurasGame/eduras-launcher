@@ -20,6 +20,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import de.illonis.eduras.launcher.EdurasLauncher;
+import de.illonis.eduras.launcher.EdurasLauncher.ReleaseChannel;
 import de.illonis.eduras.launcher.info.ChangeSet;
 import de.illonis.eduras.launcher.info.VersionNumber;
 
@@ -30,7 +31,9 @@ import de.illonis.eduras.launcher.info.VersionNumber;
  * 
  */
 public class VersionChecker {
-	public final static String DEFAULT_VERSION_URL = "http://illonis.dyndns.org/eduras/update/version.xml";
+	public final static String NIGHTLY_VERSION_URL = "http://illonis.dyndns.org/eduras/update/nightly.xml";
+	public final static String STABLE_VERSION_URL = "http://illonis.dyndns.org/eduras/update/version.xml";
+	public final static String BETA_VERSION_URL = "http://illonis.dyndns.org/eduras/update/beta.xml";
 
 	private final VersionCheckReceiver receiver;
 	private final DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
@@ -46,32 +49,47 @@ public class VersionChecker {
 	 *            the currently installed gameclient version.
 	 * @param launcherVersion
 	 *            the currently installed launcher version.
+	 * @param releaseChannel
+	 *            the client's release channel.
 	 */
 	public void checkVersion(VersionNumber clientVersion,
-			VersionNumber launcherVersion) {
+			VersionNumber launcherVersion, ReleaseChannel releaseChannel) {
 
-		Runnable r = new VersionCheckRunner(clientVersion, launcherVersion);
+		Runnable r = new VersionCheckRunner(clientVersion, launcherVersion,
+				releaseChannel);
 		Thread t = new Thread(r);
 		t.setName("VersionCheckRunner");
 		t.start();
 	}
 
-	private Document receiveVersionDocument()
+	private Document receiveVersionDocument(ReleaseChannel channel)
 			throws ParserConfigurationException, MalformedURLException,
 			SAXException, IOException {
 
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
-		Document doc = db.parse(new URL(EdurasLauncher.CONFIG.getValue(
-				"updateUrl").toString()).openStream());
+		String updateUrl;
+		switch (channel) {
+		case BETA:
+			updateUrl = BETA_VERSION_URL;
+			break;
+		case NIGHTLY:
+			updateUrl = NIGHTLY_VERSION_URL;
+			break;
+		default:
+			updateUrl = STABLE_VERSION_URL;
+			break;
+
+		}
+		Document doc = db.parse(new URL(updateUrl).openStream());
 		return doc;
 	}
 
-	private VersionInformation getServerVersion() throws UpdateException,
-			NodeNotFoundException {
+	private VersionInformation getServerVersion(ReleaseChannel channel)
+			throws UpdateException, NodeNotFoundException {
 		Document document;
 		try {
-			document = receiveVersionDocument();
+			document = receiveVersionDocument(channel);
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			throw new UpdateException(e);
 		}
@@ -238,11 +256,13 @@ public class VersionChecker {
 
 		private final VersionNumber clientVersion;
 		private final VersionNumber launcherVersion;
+		private final ReleaseChannel channel;
 
 		public VersionCheckRunner(VersionNumber clientVersion,
-				VersionNumber launcherVersion) {
+				VersionNumber launcherVersion, ReleaseChannel channel) {
 			this.clientVersion = clientVersion;
 			this.launcherVersion = launcherVersion;
+			this.channel = channel;
 		}
 
 		@Override
@@ -256,7 +276,7 @@ public class VersionChecker {
 			}
 			VersionInformation serverVersion;
 			try {
-				serverVersion = getServerVersion();
+				serverVersion = getServerVersion(channel);
 			} catch (NodeNotFoundException | UpdateException e) {
 				receiver.onUpdateError(e);
 				return;

@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 
 import de.illonis.eduras.launcher.gui.DownloadProgressListener;
 import de.illonis.eduras.launcher.gui.LauncherGui;
@@ -25,14 +26,23 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 		DownloadProgressListener, ExtractProgressListener,
 		LauncherUpdateListener, RepairProgressListener {
 
+	public enum ReleaseChannel {
+		STABLE, BETA, NIGHTLY;
+
+		public String toString() {
+			return name().toLowerCase();
+		}
+	}
+
 	public final static VersionNumber LAUNCHER_VERSION = new VersionNumber(
-			"2.1.10");
+			"2.2");
 	public final static ConfigParser CONFIG = new ConfigParser();
 	public final static String KEY_LAUNCHERNOTE = "launchernote";
 	public final static String KEY_CLIENTNOTE = "clientnote";
 
 	private final LauncherGui gui;
 	private VersionInformation updateInfo;
+	private ReleaseChannel releaseChannel = ReleaseChannel.STABLE;
 
 	public static void main(String[] args) {
 		System.out.println("launched");
@@ -46,6 +56,7 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 	}
 
 	public EdurasLauncher() {
+		releaseChannel = CONFIG.getReleaseChannel();
 		gui = new LauncherGui(this);
 	}
 
@@ -59,7 +70,7 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 		// read local version
 		gui.setVersion(getVersion());
 
-		String val = CONFIG.getValue(KEY_LAUNCHERNOTE);
+		String val = CONFIG.getValue(KEY_LAUNCHERNOTE, "");
 		if (!val.isEmpty()) {
 			gui.showMessage("Launcher updated", val);
 			CONFIG.set(KEY_LAUNCHERNOTE, "");
@@ -75,7 +86,7 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 
 		// compare local version with server version.
 		VersionChecker vc = new VersionChecker(this);
-		vc.checkVersion(getVersion(), LAUNCHER_VERSION);
+		vc.checkVersion(getVersion(), LAUNCHER_VERSION, releaseChannel);
 	}
 
 	@Override
@@ -113,14 +124,33 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		JButton button = (JButton) e.getSource();
-		if (button.getText().toLowerCase().contains("start")) {
-			// start game
-			launchGame();
+		if (e.getSource() instanceof JButton) {
+			JButton button = (JButton) e.getSource();
+			if (button.getText().toLowerCase().contains("start")) {
+				// start game
+				launchGame();
+			} else {
+				// repair
+				repair();
+			}
 		} else {
-			// repair
-			repair();
+			JComboBox<?> cb = (JComboBox<?>) e.getSource();
+			ReleaseChannel release = ((ReleaseChannel) cb.getSelectedItem());
+			if (release != null)
+				setRelease(release);
 		}
+	}
+
+	private void setRelease(ReleaseChannel releaseChannel) {
+		this.releaseChannel = releaseChannel;
+		System.out.println("Set release channel to " + releaseChannel);
+		CONFIG.setRelease(releaseChannel);
+		try {
+			CONFIG.save();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		check();
 	}
 
 	private void repair() {
@@ -160,7 +190,7 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 		if (getVersion() == updateInfo.getVersion()) {
 			gui.setStatus("Update completed.");
 			gui.ready();
-			String val = CONFIG.getValue(KEY_CLIENTNOTE);
+			String val = CONFIG.getValue(KEY_CLIENTNOTE, "");
 			if (!val.isEmpty()) {
 				gui.showMessage("Client updated", val);
 				CONFIG.set(KEY_CLIENTNOTE, "");

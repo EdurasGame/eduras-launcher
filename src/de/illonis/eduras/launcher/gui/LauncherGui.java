@@ -6,6 +6,7 @@ import java.beans.PropertyChangeListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -13,6 +14,7 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
 import de.illonis.eduras.launcher.EdurasLauncher;
+import de.illonis.eduras.launcher.EdurasLauncher.ReleaseChannel;
 import de.illonis.eduras.launcher.gui.images.ImageFiler;
 import de.illonis.eduras.launcher.info.VersionNumber;
 
@@ -23,6 +25,7 @@ public class LauncherGui implements PropertyChangeListener {
 	private JButton startButton;
 	private JButton repairButton;
 	private JProgressBar updateBar;
+	private JComboBox<ReleaseChannel> releaseSelect;
 
 	public LauncherGui(EdurasLauncher launcher) {
 		buildGui(launcher);
@@ -63,7 +66,15 @@ public class LauncherGui implements PropertyChangeListener {
 		bottomPanel.add(startButton, BorderLayout.EAST);
 		bottomPanel.add(repairButton, BorderLayout.WEST);
 
+		JPanel configPanel = new JPanel(new BorderLayout());
+		releaseSelect = new JComboBox<ReleaseChannel>(ReleaseChannel.values());
+		releaseSelect.addActionListener(launcher);
+		configPanel.add(releaseSelect, BorderLayout.EAST);
+		releaseSelect
+				.setSelectedItem(EdurasLauncher.CONFIG.getReleaseChannel());
+
 		JPanel topPanel = new JPanel(new BorderLayout());
+		topPanel.add(configPanel, BorderLayout.NORTH);
 		topPanel.add(title, BorderLayout.CENTER);
 		JPanel labelPanel = new JPanel(new BorderLayout());
 		labelPanel.add(versionLabel, BorderLayout.NORTH);
@@ -113,7 +124,12 @@ public class LauncherGui implements PropertyChangeListener {
 	}
 
 	public void setVersion(VersionNumber versionNumber) {
-		versionLabel.setText("version " + versionNumber.toString());
+		String name = EdurasLauncher.CONFIG.getValue("releaseName", "");
+		String vName = "version " + versionNumber.toString();
+		if (!name.isEmpty()) {
+			vName += " (" + name + ")";
+		}
+		versionLabel.setText(vName);
 	}
 
 	public void exit() {
