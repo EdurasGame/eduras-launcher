@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JWrapper>
+
+	<!-- This tells JWrapper the name of your app bundle, you should use only 
+		letters, spaces and numbers here -->
+	<BundleName>Eduras</BundleName>
+	<File classpath="yes">../Eduras/output/jars/eduras-client.jar</File>
+
+	<!-- client -->
+	<App>
+		<!-- The name of the app that launches -->
+		<Name>Eduras?</Name>
+
+
+		<!-- The logo for the app, we automatically scale and convert it to OS 
+			specific formats -->
+		<LogoPNG>images/logo_small.png</LogoPNG>
+
+		<!-- The Java main class for your app -->
+		<MainClass>de.illonis.eduras.gameclient.EdurasClient</MainClass>
+	</App>
+	
+	<MatchClientVersionToServerVersion>true</MatchClientVersionToServerVersion>
+
+	<!-- This tells JWrapper what languages your app uses so JWrapper can let 
+		the user choose (if its more than one) -->
+	<SupportedLanguages>en,de</SupportedLanguages>
+
+	<!-- If your app needs to run elevated (as admin) on Windows you can specify 
+		that here -->
+	<WindowsElevation>None</WindowsElevation>
+
+	<!-- This app installs itself for the current user, you can also install 
+		for all users or run as a temporary executable -->
+	<InstallType>CurrentUser</InstallType>
+
+	<!-- This is the optional update URL for the app, if the files here get 
+		updated the app will auto update -->
+	<UpdateURL>http://illonis.dyndns.org/eduras/updater</UpdateURL>
+
+	<!-- This specifies the splash image for your app bundle, we automatically 
+		scale it and convert it to OS specific formats -->
+	<SplashPNG>images/logo.png</SplashPNG>
+
+	<!-- This specifies the logo for your app bundle, we automatically scale 
+		it and embed it in your native exes -->
+	<BundleLogoPNG>images/logo_small.png</BundleLogoPNG>
+
+	<Windows32JRE>/home/illonis/jre/win32/jre1.7.0_05</Windows32JRE>
+	<Windows64JRE>/home/illonis/jre/win32/jre1.7.0_05</Windows64JRE>
+	<Linux32JRE>/home/illonis/jre/linux/jre1.7.0_13</Linux32JRE>
+	<Linux64JRE>/home/illonis/jre/linuxx64/jre1.7.0_13</Linux64JRE>
+	<Mac64JRE>/home/illonis/jre/macos64/jre1.7.0_25</Mac64JRE>
+
+</JWrapper>

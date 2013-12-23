@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="build_jwrapper" default="build">
+
+	<property name="base" value="../Eduras/" />
+	<property name="jars" value="output/jars" />
+
+	<target name="build" description="Creates native binaries">
+		<!-- This snippet autodetects the name of the JWrapper JAR in the current 
+			directory '.' so you can update JW easily -->
+		<path id="jwrapper.jar.path">
+			<fileset dir="lib/">
+				<include name="jwrapper-00*.jar" />
+			</fileset>
+		</path>
+		<property name="JWrapperJAR" refid="jwrapper.jar.path" />
+
+		<!-- This runs JWrapper, giving it plenty of memory to compress those big 
+			JVMs right down -->
+		<java jar="${JWrapperJAR}" failonerror="true" fork="true">
+			<jvmarg value="-Xmx512m" />
+			<arg value="jwrapper.xml" />
+		</java>
+	</target>
+</project>
