@@ -5,7 +5,7 @@
 	<!-- This tells JWrapper the name of your app bundle, you should use only 
 		letters, spaces and numbers here -->
 	<BundleName>Eduras</BundleName>
-	<File classpath="yes">../Eduras/output/jars/eduras-client.jar</File>
+	<File classpath="yes">../dist/jars/eduras-client.jar</File>
 
 	<!-- client -->
 	<App>
