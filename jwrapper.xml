@@ -6,6 +6,7 @@
 		letters, spaces and numbers here -->
 	<BundleName>Eduras</BundleName>
 	<File classpath="yes">../dist/jars/eduras-client.jar</File>
+	<File classpath="yes">../dist/jars/launcher.jar</File>
 
 	<!-- client -->
 	<App>
@@ -20,8 +21,16 @@
 		<!-- The Java main class for your app -->
 		<MainClass>de.illonis.eduras.gameclient.EdurasClient</MainClass>
 	</App>
-	
-	<MatchClientVersionToServerVersion>true</MatchClientVersionToServerVersion>
+
+	<App>
+		<Name>JWrapperPostInstallApp</Name>
+		<LogoPNG>images/logo_small.png</LogoPNG>
+		<MainClass>de.eduras.launcher.setup.PostInstallHandler</MainClass>
+		<UserAccessible>false</UserAccessible>
+	</App>
+
+	<MatchClientVersionToServerVersion>true
+	</MatchClientVersionToServerVersion>
 
 	<!-- This tells JWrapper what languages your app uses so JWrapper can let 
 		the user choose (if its more than one) -->

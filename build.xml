@@ -5,7 +5,28 @@
 	<property name="base" value="../Eduras/" />
 	<property name="jars" value="../dist/jars" />
 
-	<target name="build" description="Creates native binaries">
+	<path id="classpath">
+		<fileset dir="lib/">
+			<include name="jwrapper_utils.jar" />
+		</fileset>
+		<pathelement path="bin/" />
+	</path>
+
+	<target name="compile" description="Compiles java classes.">
+		<mkdir dir="bin/" />
+		<javac srcdir="src/" destdir="bin/" includeAntRuntime="false">
+			<classpath refid="classpath" />
+			<include name="**/*.java" />
+		</javac>
+	</target>
+
+	<target name="jar" depends="compile" description="Creates launcher jar">
+		<jar destfile="${jars}/launcher.jar" basedir="bin/">
+			<zipgroupfileset dir="lib/" includes="jwrapper_utils.jar" />
+		</jar>
+	</target>
+
+	<target name="build" depends="jar" description="Creates native binaries">
 		<!-- This snippet autodetects the name of the JWrapper JAR in the current 
 			directory '.' so you can update JW easily -->
 		<path id="jwrapper.jar.path">
@@ -21,9 +42,10 @@
 			<jvmarg value="-Xmx512m" />
 			<arg value="jwrapper.xml" />
 		</java>
-
-		<move todir="../dist/setup">
+		<!-- You will need to build everything again from scratch if you move instead 
+			of copy -->
+		<copy todir="../dist/setup">
 			<fileset dir="build" />
-		</move>
+		</copy>
 	</target>
 </project>
