@@ -5,7 +5,7 @@
 	<property name="base" value="../Eduras/" />
 	<property name="jars" value="../dist/jars" />
 
-	<path id="classpath">
+	<path id="launcherclasspath">
 		<fileset dir="lib/">
 			<include name="jwrapper_utils.jar" />
 		</fileset>
@@ -15,7 +15,7 @@
 	<target name="compile" description="Compiles java classes.">
 		<mkdir dir="bin/" />
 		<javac srcdir="src/" destdir="bin/" includeAntRuntime="false">
-			<classpath refid="classpath" />
+			<classpath refid="launcherclasspath" />
 			<include name="**/*.java" />
 		</javac>
 	</target>
