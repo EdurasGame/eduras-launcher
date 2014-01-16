@@ -1,24 +1,16 @@
 package de.illonis.eduras.launcher.installer;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
-
-import de.illonis.eduras.launcher.network.DownloadFile;
-import de.illonis.eduras.launcher.network.FileDownloader;
-import de.illonis.eduras.launcher.tools.PathFinder;
 
 public class InstallTask extends SwingWorker<Boolean, Void> {
 
 	public final static String INSTALL_JAR = "eduras.jar";
-
-	private final static String LAUNCHER_BASE = "http://illonis.dyndns.org/eduras/update/";
 
 	private final InstallFinishedListener listener;
 	private final Path target;
@@ -31,28 +23,17 @@ public class InstallTask extends SwingWorker<Boolean, Void> {
 
 	@Override
 	protected Boolean doInBackground() {
+		InputStream input = getClass().getResourceAsStream(
+				"/eduras-launcher.jar");
 
-		DownloadFile f = new DownloadFile(INSTALL_JAR, Long.MAX_VALUE);
-		try {
-			FileDownloader dl = new FileDownloader(f, LAUNCHER_BASE);
-			dl.execute();
-			dl.get();
-			if (!dl.isOk()) {
-				error = dl.getError().getMessage();
-				return false;
-			}
-		} catch (MalformedURLException | InterruptedException
-				| ExecutionException e) {
-			error = e.getMessage();
-			e.printStackTrace();
+		if (input == null) {
+			System.out.println("internal setup file not found.");
 			return false;
 		}
-		Path sourceJar = Paths.get(PathFinder.findFile(INSTALL_JAR));
-		Path targetJar = target.resolve(INSTALL_JAR);
 
+		Path targetJar = target.resolve(INSTALL_JAR);
 		try {
-			Files.move(sourceJar, targetJar,
-					StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(input, targetJar, StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
 			error = e.getMessage();
 			e.printStackTrace();

@@ -6,6 +6,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.security.CodeSource;
 
 /**
  * Simplifies resource locating.
@@ -21,16 +22,27 @@ public class PathFinder {
 	 * @return the jar's location.
 	 */
 	public static URL getBaseDir() {
+		URI uri;
 		try {
-			URI uri = ClassLoader.getSystemClassLoader().getResource(".")
-					.toURI();
-			// URI uri =
-			// PathFinder.class.getProtectionDomain().getCodeSource().getLocation().toURI();
-
-			// (PathFinder.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-			URI parent = uri.resolve(".");
-			return parent.toURL();
+			URL url = ClassLoader.getSystemClassLoader().getResource(".");
+			if (url != null) {
+				uri = url.toURI();
+				// (PathFinder.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+				URI parent = uri.resolve(".");
+				return parent.toURL();
+			} else {
+				// try another way
+				CodeSource source = PathFinder.class.getProtectionDomain()
+						.getCodeSource();
+				if (source != null) {
+					URL url2 = source.getLocation();
+					return url2;
+				} else
+					throw new RuntimeException(
+							"Base directory could not be resolved.");
+			}
 		} catch (URISyntaxException | MalformedURLException e) {
+			System.out.println("base dir not found.");
 			return null;
 		}
 	}
@@ -50,7 +62,6 @@ public class PathFinder {
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;

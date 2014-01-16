@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -82,8 +83,13 @@ public class ConfigParser {
 		otherConfigs.clear();
 		version = new VersionNumber("0");
 		otherConfigs.putAll(CONFIG_DEFAULTS);
+		URI fileUri = PathFinder.findFile(CONFIG_FILE);
+		if (fileUri == null)
+			return;
+		File f = new File(fileUri);
+
 		try {
-			File f = new File(PathFinder.findFile(CONFIG_FILE));
+
 			BufferedReader reader = new BufferedReader(new FileReader(f));
 			String line;
 			while ((line = reader.readLine()) != null) {
