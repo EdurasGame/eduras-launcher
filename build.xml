@@ -1,51 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="build_jwrapper" default="build">
+<project name="build_installlauncher" default="build">
 
 	<property name="base" value="../Eduras/" />
+	<property name="build" value="bin/" />
+	<property name="src" value="src/" />
 	<property name="jars" value="../dist/jars" />
 
 	<path id="launcherclasspath">
-		<fileset dir="lib/">
-			<include name="jwrapper_utils.jar" />
-		</fileset>
-		<pathelement path="bin/" />
+		<pathelement path="${build}" />
 	</path>
 
 	<target name="compile" description="Compiles java classes.">
 		<mkdir dir="bin/" />
-		<javac srcdir="src/" destdir="bin/" includeAntRuntime="false">
+		<javac srcdir="src/" destdir="${build}" includeAntRuntime="false">
 			<classpath refid="launcherclasspath" />
 			<include name="**/*.java" />
 		</javac>
 	</target>
 
-	<target name="jar" depends="compile" description="Creates launcher jar">
-		<jar destfile="${jars}/launcher.jar" basedir="bin/">
-			<zipgroupfileset dir="lib/" includes="jwrapper_utils.jar" />
+	<target name="clean">
+		<delete dir="${build}" />
+	</target>
+
+	<target name="jar-launcher" depends="compile" description="Creates launcher jar">
+		<jar destfile="${jars}/eduras-launcher.jar" basedir="${build}"
+			includes="**/*.class">
+			<fileset dir="${src}">
+				<include name="**/*.png"></include>
+				<include name="**/*.gif"></include>
+			</fileset>
+			<manifest>
+				<attribute name="Main-Class"
+					value="de.illonis.eduras.launcher.EdurasLauncher" />
+			</manifest>
 		</jar>
 	</target>
 
-	<target name="build" depends="jar" description="Creates native binaries">
-		<!-- This snippet autodetects the name of the JWrapper JAR in the current 
-			directory '.' so you can update JW easily -->
-		<path id="jwrapper.jar.path">
-			<fileset dir="lib/">
-				<include name="jwrapper-00*.jar" />
+	<target name="jar-installer" depends="jar-launcher" description="Creates installer jar">
+		<jar destfile="${jars}/eduras-setup.jar" basedir="${build}"
+			includes="**/*.class">
+			<fileset dir="${src}">
+				<include name="**/*.png"></include>
+				<include name="**/*.gif"></include>
 			</fileset>
-		</path>
-		<property name="JWrapperJAR" refid="jwrapper.jar.path" />
+			<fileset dir="${jars}">
+				<include name="eduras-launcher.jar"></include>
+			</fileset>
+			<manifest>
+				<attribute name="Main-Class"
+					value="de.illonis.eduras.launcher.installer.EdurasInstaller" />
+			</manifest>
+		</jar>
+	</target>
 
-		<!-- This runs JWrapper, giving it plenty of memory to compress those big 
-			JVMs right down -->
-		<java jar="${JWrapperJAR}" failonerror="true" fork="true">
-			<jvmarg value="-Xmx512m" />
-			<arg value="jwrapper.xml" />
-		</java>
-		<!-- You will need to build everything again from scratch if you move instead 
-			of copy -->
-		<copy todir="../dist/setup">
-			<fileset dir="build" />
-		</copy>
+	<target name="build" depends="jar-launcher, jar-installer"
+		description="Creates launcher and installers">
+		<!-- just to combine jar creation of launcher and installer -->
 	</target>
 </project>
