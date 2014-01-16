@@ -1,15 +1,12 @@
 package de.illonis.eduras.launcher;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
 
-import de.illonis.eduras.launcher.tools.DeleteFileWalker;
 import de.illonis.eduras.launcher.tools.NoJarFileException;
 import de.illonis.eduras.launcher.tools.PathFinder;
 
@@ -31,11 +28,13 @@ public class RepairTask extends SwingWorker<Boolean, Void> {
 			return false;
 		}
 		Path p = Paths.get(PathFinder.getBaseDir().toURI());
-		try {
-			Files.walkFileTree(p, new DeleteFileWalker(jar));
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
+		// try {
+		// FIXME: repair is buggy
+		// Files.walkFileTree(p, new DeleteFileWalker(jar));
+		// } catch (IOException e1) {
+		// e1.printStackTrace();
+		// return false;
+		// }
 
 		return true;
 	}

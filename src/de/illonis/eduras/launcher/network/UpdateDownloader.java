@@ -63,7 +63,7 @@ public class UpdateDownloader extends SwingWorker<Void, Void> {
 		if (ex instanceof FileNotFoundException) {
 			error = "File not found: " + file.getFileName();
 		} else {
-			error = ex.getClass().getName() + " in " + file.getFileName();
+			error = ex.toString() + " in " + file.getFileName();
 		}
 	}
 

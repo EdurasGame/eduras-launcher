@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Paths;
 
 import javax.swing.SwingWorker;
 
@@ -18,16 +19,16 @@ public class FileDownloader extends SwingWorker<Void, Void> {
 
 	private final URL source;
 	private final URI target;
-	private final long fileSize;
 	private boolean ok = false;
+	private final DownloadFile file;
 	private Exception error;
 
 	public FileDownloader(DownloadFile f, String baseUrl, String newFileName)
 			throws MalformedURLException {
 		System.out.println(f.getFileName());
+		this.file = f;
 		source = new URL(baseUrl + f.getFileName());
 		target = PathFinder.findFile(newFileName);
-		fileSize = f.getFileSize();
 	}
 
 	public FileDownloader(DownloadFile f, String baseUrl)
@@ -40,6 +41,12 @@ public class FileDownloader extends SwingWorker<Void, Void> {
 	protected Void doInBackground() {
 		System.out.println("Started downloader for " + source.toString()
 				+ " to " + target.getPath());
+
+		ok = download() && validate();
+		return null;
+	}
+
+	private boolean download() {
 		long totalBytesRead = 0;
 		InputStream inputStream = null;
 		FileOutputStream outputStream = null;
@@ -54,13 +61,13 @@ public class FileDownloader extends SwingWorker<Void, Void> {
 			while ((bytesRead = inputStream.read(buffer)) != -1) {
 				outputStream.write(buffer, 0, bytesRead);
 				totalBytesRead += bytesRead;
-				double p = (double) totalBytesRead * 100 / fileSize;
+				double p = (double) totalBytesRead * 100 / file.getFileSize();
 				setProgress((int) p);
 			}
-			ok = true;
+			return true;
 		} catch (IOException e) {
 			error = e;
-			ok = false;
+			return false;
 		} finally {
 			if (inputStream != null) {
 				try {
@@ -75,8 +82,13 @@ public class FileDownloader extends SwingWorker<Void, Void> {
 				}
 			}
 		}
+	}
 
-		return null;
+	private boolean validate() {
+		boolean ok = DownloadFile.validateHash(Paths.get(target), file.getHash());
+		if (!ok)
+			error = new HashTestException(file.getFileName());
+		return ok;
 	}
 
 	public boolean isOk() {

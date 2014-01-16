@@ -21,10 +21,10 @@ public class LauncherUpdateDownloader extends SwingWorker<Void, Void> {
 	@Override
 	protected Void doInBackground() throws Exception {
 		DownloadFile f = new DownloadFile(info.getDownloadName(),
-				info.getFileSize());
+				info.getFileSize(), "");
 
 		DownloadFile f2 = new DownloadFile(info.getUpdaterName(),
-				info.getUpdaterFileSize());
+				info.getUpdaterFileSize(), "");
 		FileDownloader dl = null;
 		FileDownloader dl2 = null;
 		try {

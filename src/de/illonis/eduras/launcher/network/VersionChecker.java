@@ -31,7 +31,7 @@ import de.illonis.eduras.launcher.info.VersionNumber;
  * 
  */
 public class VersionChecker {
-	public final static String NIGHTLY_VERSION_URL = "http://illonis.dyndns.org/eduras/update/nightly.xml";
+	public final static String NIGHTLY_VERSION_URL = "http://illonis.dyndns.org/eduras/update/nightly.php";
 	public final static String STABLE_VERSION_URL = "http://illonis.dyndns.org/eduras/update/version.xml";
 	public final static String BETA_VERSION_URL = "http://illonis.dyndns.org/eduras/update/beta.xml";
 
@@ -184,7 +184,8 @@ public class VersionChecker {
 							String name = child.getFirstChild().getNodeValue();
 							long size = Long.parseLong(child
 									.getAttribute("size"));
-							files.add(new DownloadFile(name, size));
+							String hash = child.getAttribute("sha256");
+							files.add(new DownloadFile(name, size, hash));
 						}
 					}
 				}
