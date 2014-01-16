@@ -34,6 +34,7 @@ public class EdurasInstaller implements InstallFinishedListener {
 	private void buildGui() {
 
 		frame.setSize(500, 300);
+		frame.setResizable(false);
 		JPanel panel = (JPanel) frame.getContentPane();
 		panel.setLayout(new BorderLayout());
 		panel.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));

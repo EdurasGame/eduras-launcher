@@ -6,10 +6,10 @@ import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JOptionPane;
 
 import de.illonis.eduras.launcher.gui.DownloadProgressListener;
 import de.illonis.eduras.launcher.gui.LauncherGui;
@@ -134,7 +134,14 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 				launchGame();
 			} else {
 				// repair
-				repair();
+				int result = gui
+						.ask("Repair game",
+								"Do you really want to repair installation?\n"
+										+ "This will download all files again and may overwrite changes in your config.ini.",
+								JOptionPane.YES_NO_OPTION);
+
+				if (result == JOptionPane.YES_OPTION)
+					repair();
 			}
 		} else {
 			JComboBox<?> cb = (JComboBox<?>) e.getSource();
@@ -229,19 +236,14 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 				return;
 
 			String s = jarObj.toString();
-			URI u;
-			try {
-				u = new URI(s);
+			URI jarFile = PathFinder.findFile(s);
 
-				GameStarter starter = new GameStarter(u);
-				starter.start();
-				try {
-					starter.join();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			} catch (URISyntaxException e1) {
-				e1.printStackTrace();
+			GameStarter starter = new GameStarter(jarFile);
+			starter.start();
+			try {
+				starter.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 
 			gui.exit();

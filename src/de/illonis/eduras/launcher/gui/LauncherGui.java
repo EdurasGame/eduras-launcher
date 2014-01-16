@@ -39,7 +39,7 @@ public class LauncherGui implements PropertyChangeListener {
 	private void buildGui(EdurasLauncher launcher) {
 
 		frame = new JFrame("Eduras? Launcher");
-		frame.setSize(500, 300);
+		frame.setSize(600, 400);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		JPanel panel = (JPanel) frame.getContentPane();
 		JLabel title = new JLabel(ImageFiler.loadIcon("logo.png"));
@@ -147,6 +147,10 @@ public class LauncherGui implements PropertyChangeListener {
 	public void showMessage(String title, String message) {
 		JOptionPane.showMessageDialog(frame, message, title,
 				JOptionPane.INFORMATION_MESSAGE);
+	}
+
+	public int ask(String title, String message, int optionType) {
+		return JOptionPane.showConfirmDialog(frame, message, title, optionType);
 	}
 
 	public void showError(String title, String message) {
