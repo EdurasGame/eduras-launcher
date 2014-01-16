@@ -5,7 +5,6 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -37,7 +36,7 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 	}
 
 	public final static VersionNumber LAUNCHER_VERSION = new VersionNumber(
-			"2.2.2");
+			"2.2.3");
 	public final static ConfigParser CONFIG = new ConfigParser();
 	public final static String KEY_LAUNCHERNOTE = "launchernote";
 	public final static String KEY_CLIENTNOTE = "clientnote";
@@ -231,14 +230,11 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 
 		@Override
 		public void run() {
-			Object jarObj = EdurasLauncher.CONFIG.getValue("gameJar");
+			String jarObj = EdurasLauncher.CONFIG.getValue("gameJar");
 			if (jarObj == null)
 				return;
 
-			String s = jarObj.toString();
-			URI jarFile = PathFinder.findFile(s);
-
-			GameStarter starter = new GameStarter(jarFile);
+			GameStarter starter = new GameStarter(jarObj);
 			starter.start();
 			try {
 				starter.join();
