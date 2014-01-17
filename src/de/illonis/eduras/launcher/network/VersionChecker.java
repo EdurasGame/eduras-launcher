@@ -109,9 +109,6 @@ public class VersionChecker {
 		String metaserver = getNodeValue(docElement, "metaserver");
 		String updateUrl = getNodeValue(docElement, "updateUrl");
 		String gameJar = getNodeValue(docElement, "gameJar");
-
-		VersionNumber launcherVersion = null;
-
 		String releaseDate = getNodeValue(docElement, "releaseDate");
 
 		Date release;
@@ -129,7 +126,7 @@ public class VersionChecker {
 		}
 
 		VersionInformation info = new VersionInformation(version, release,
-				gameJar, metaserver, homePage, updateUrl, releaseName, lui,
+				gameJar, metaserver, homePage, updateUrl, releaseName,
 				getChangeSets(docElement, version));
 
 		return info;
@@ -278,11 +275,7 @@ public class VersionChecker {
 			}
 			updateBasics(serverVersion);
 
-			if (null != serverVersion.getLauncherInfo()
-					&& launcherVersion.compareTo(serverVersion
-							.getLauncherInfo().getVersion()) < 0)
-				receiver.onLauncherOutdated(serverVersion.getLauncherInfo());
-			else if (channel == ReleaseChannel.NIGHTLY) {
+			if (channel == ReleaseChannel.NIGHTLY) {
 				if (clientVersion.getReleaseDate().before(
 						serverVersion.getReleaseDate())) {
 					receiver.onUpdateRequired(serverVersion);
@@ -306,31 +299,50 @@ public class VersionChecker {
 			}
 			Element docElement = doc.getDocumentElement();
 
+			String note;
 			try {
-				NodeList launcherData = docElement.getElementsByTagName("launcher");
-				Node launcherNode = launcherData.item(0);
-				if (launcherNode instanceof Element) {
-					Element e = (Element) launcherNode;
-					String launcherName = getNodeValue(e, "name");
-					String updater = getNodeValue(e, "updater");
-					String note;
-					try {
-						note = getNodeValue(e, "note");
-					} catch (NodeNotFoundException ne) {
-						note = "";
-					}
+				note = getNodeValue(docElement, "note");
+			} catch (NodeNotFoundException ne) {
+				note = "";
+			}
+			String baseUrl = getNodeValue(docElement, "baseUrl");
 
-					long size = Long.parseLong(getNodeValue(e, "size"));
-					long updatersize = Long
-							.parseLong(getNodeValue(e, "updatersize"));
-					String baseUrl = getNodeValue(e, "baseUrl");
+			VersionNumber newLauncherVersion = new VersionNumber(getNodeValue(
+					docElement, "version"));
 
-					launcherVersion = new VersionNumber(getNodeValue(e, "version"));
-					return new LauncherUpdateInfo(note, launcherVersion, updater,
-							baseUrl, launcherName, size, updatersize);
-				} else {
-					throw new UpdateException(new Exception("No sufficient data for launcher update."));
-				}
+			// launcher node
+			Node node = docElement.getElementsByTagName("launcher").item(0);
+			if (node == null)
+				throw new NodeNotFoundException("launcher");
+			Node launcherNode = node.getFirstChild();
+			if (launcherNode == null)
+				throw new NodeNotFoundException("launcher");
+
+			long launcherSize = Long.parseLong(node.getAttributes()
+					.getNamedItem("size").getNodeValue());
+
+			String launcherHash = node.getAttributes().getNamedItem("sha256")
+					.getNodeValue();
+			DownloadFile launcherFile = new DownloadFile(
+					launcherNode.getNodeValue(), launcherSize, launcherHash);
+
+			// updater node
+			Node updaterNode = docElement.getElementsByTagName("updater").item(
+					0);
+			if (updaterNode == null)
+				throw new NodeNotFoundException("launcher");
+			Node updatersNode = updaterNode.getFirstChild();
+			if (updatersNode == null)
+				throw new NodeNotFoundException("launcher");
+			long updaterSize = Long.parseLong(updaterNode.getAttributes()
+					.getNamedItem("size").getNodeValue());
+			String updaterHash = updaterNode.getAttributes()
+					.getNamedItem("sha256").getNodeValue();
+			DownloadFile updaterFile = new DownloadFile(
+					updatersNode.getNodeValue(), updaterSize, updaterHash);
+
+			return new LauncherUpdateInfo(note, newLauncherVersion, baseUrl,
+					launcherFile, updaterFile);
 		}
 
 		private void updateBasics(VersionInformation serverVersion) {

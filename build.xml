@@ -37,6 +37,30 @@
 		</jar>
 	</target>
 
+	<target name="jar-lupdater" depends="compile"
+		description="Creates launcher updater jar">
+		<jar destfile="${jars}/lupdater.jar" basedir="${build}" includes="**/*.class">
+			<manifest>
+				<attribute name="Main-Class"
+					value="de.illonis.eduras.launcher.selfupdater.LauncherUpdater" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="jar-sha256" depends="compile"
+		description="Creates SHA-256 calculator jar">
+		<jar destfile="${jars}/tools/sha256.jar">
+		    <fileset dir="${build}">
+				<include name="**/SHA256Calculator.class"></include>
+				<include name="**/DownloadFile.class"></include>
+			</fileset>
+			<manifest>
+				<attribute name="Main-Class"
+					value="de.illonis.eduras.launcher.tools.SHA256Calculator" />
+			</manifest>
+		</jar>
+	</target>
+
 	<target name="jar-installer" depends="jar-launcher" description="Creates installer jar">
 		<jar destfile="${jars}/eduras-setup.jar" basedir="${build}"
 			includes="**/*.class">
@@ -54,7 +78,8 @@
 		</jar>
 	</target>
 
-	<target name="build" depends="jar-launcher, jar-installer"
+	<target name="build"
+		depends="jar-launcher, jar-installer, jar-lupdater, jar-sha256"
 		description="Creates launcher and installers">
 		<!-- just to combine jar creation of launcher and installer -->
 	</target>

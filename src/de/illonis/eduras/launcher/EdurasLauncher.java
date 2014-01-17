@@ -3,7 +3,6 @@ package de.illonis.eduras.launcher;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
-import java.io.File;
 import java.io.IOException;
 
 import javax.swing.JButton;
@@ -21,7 +20,6 @@ import de.illonis.eduras.launcher.network.UpdateDownloader;
 import de.illonis.eduras.launcher.network.VersionCheckReceiver;
 import de.illonis.eduras.launcher.network.VersionChecker;
 import de.illonis.eduras.launcher.network.VersionInformation;
-import de.illonis.eduras.launcher.tools.PathFinder;
 
 public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 		DownloadProgressListener, ExtractProgressListener,
@@ -104,11 +102,11 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 	@Override
 	public void onNoUpdateRequired(VersionInformation info) {
 		gui.setStatus("No update required.");
-		String updater = info.getLauncherInfo().getUpdaterName();
-		if (!updater.isEmpty()) {
-			File f = new File(PathFinder.findFile(updater));
-			f.delete();
-		}
+		// String updater = info.getLauncherInfo().getUpdaterName();
+		// if (!updater.isEmpty()) {
+		// File f = new File(PathFinder.findFile(updater));
+		// f.delete();
+		// }
 		checkLocal();
 		gui.ready();
 	}

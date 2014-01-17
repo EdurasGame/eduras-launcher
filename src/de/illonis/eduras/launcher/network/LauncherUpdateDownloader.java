@@ -20,11 +20,9 @@ public class LauncherUpdateDownloader extends SwingWorker<Void, Void> {
 
 	@Override
 	protected Void doInBackground() throws Exception {
-		DownloadFile f = new DownloadFile(info.getDownloadName(),
-				info.getFileSize(), "");
+		DownloadFile f = info.getNewLauncherFile();
+		DownloadFile f2 = info.getUpdaterFile();
 
-		DownloadFile f2 = new DownloadFile(info.getUpdaterName(),
-				info.getUpdaterFileSize(), "");
 		FileDownloader dl = null;
 		FileDownloader dl2 = null;
 		try {
@@ -52,13 +50,11 @@ public class LauncherUpdateDownloader extends SwingWorker<Void, Void> {
 
 	@Override
 	protected void done() {
-
 		l.exitLauncher();
-		String updater = info.getUpdaterName();
-
+		String updater = info.getUpdaterFile().getFileName();
 		GameStarter st = new GameStarter(updater);
-		st.setArguments(info.getDownloadName(), info.getDownloadName() + ".new");
+		String fileName = info.getNewLauncherFile().getFileName();
+		st.setArguments(fileName, fileName + ".new");
 		st.start();
 	}
-
 }
