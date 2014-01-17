@@ -39,7 +39,7 @@
 
 	<target name="jar-lupdater" depends="compile"
 		description="Creates launcher updater jar">
-		<jar destfile="${jars}/lupdater.jar" basedir="${build}" includes="**/*.class">
+		<jar destfile="${jars}/tools/lupdater.jar" basedir="${build}" includes="**/*.class">
 			<manifest>
 				<attribute name="Main-Class"
 					value="de.illonis.eduras.launcher.selfupdater.LauncherUpdater" />
