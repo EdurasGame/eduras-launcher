@@ -21,6 +21,10 @@ import de.illonis.eduras.launcher.tools.PathFinder;
  * 
  */
 public class ConfigParser {
+
+	public final static String KEY_LAUNCHERNOTE = "launchernote";
+	public final static String KEY_CLIENTNOTE = "clientnote";
+
 	private final static String CONFIG_FILE = "config.ini";
 	private final static String KEY_RELEASE_CHANNEL = "releaseChannel";
 
@@ -28,6 +32,7 @@ public class ConfigParser {
 	private VersionNumber version = new VersionNumber("0");
 	private final HashMap<String, String> otherConfigs;
 	private final static HashMap<String, String> CONFIG_DEFAULTS;
+
 	static {
 		CONFIG_DEFAULTS = new HashMap<String, String>();
 		CONFIG_DEFAULTS.put("gameJar", "eduras.jar");

@@ -40,6 +40,7 @@ public class LauncherGui implements PropertyChangeListener {
 
 		frame = new JFrame("Eduras? Launcher");
 		frame.setSize(600, 400);
+		frame.setResizable(false);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		JPanel panel = (JPanel) frame.getContentPane();
 		JLabel title = new JLabel(ImageFiler.loadIcon("logo.png"));

@@ -6,6 +6,12 @@ import java.util.LinkedList;
 import de.illonis.eduras.launcher.info.ChangeSet;
 import de.illonis.eduras.launcher.info.VersionNumber;
 
+/**
+ * Contains version information from server.
+ * 
+ * @author illonis
+ * 
+ */
 public class VersionInformation {
 
 	private final VersionNumber version;

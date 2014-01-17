@@ -1,5 +1,11 @@
 package de.illonis.eduras.launcher;
 
+/**
+ * Listens and reacts on events fired by the download extraction process.
+ * 
+ * @author illonis
+ * 
+ */
 public interface ExtractProgressListener {
 
 	/**

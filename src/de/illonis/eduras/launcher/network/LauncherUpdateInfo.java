@@ -2,16 +2,18 @@ package de.illonis.eduras.launcher.network;
 
 import de.illonis.eduras.launcher.info.VersionNumber;
 
+/**
+ * Holds information about current launcher version on server.
+ * 
+ * @author illonis
+ * 
+ */
 public class LauncherUpdateInfo {
 
 	private final String note;
 	private final VersionNumber version;
 	private final String baseUrl;
 	private final DownloadFile newLauncherFile, updaterFile;
-
-	public LauncherUpdateInfo() {
-		this("", new VersionNumber("0"), "", null, null);
-	}
 
 	public LauncherUpdateInfo(String note, VersionNumber launcherVersion,
 			String baseUrl, DownloadFile newLauncherFile,

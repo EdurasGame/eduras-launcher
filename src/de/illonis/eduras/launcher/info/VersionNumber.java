@@ -14,7 +14,7 @@ import java.util.Date;
  * Call the {@link #toString()} method to receive a short string representation.
  * Use {@link #toString(boolean)} to also receive a long version.
  * </p>
- * <b>Examples:</b>
+ * <b>Examples:</b> (short/long)
  * <ul>
  * <li>1.2 (1.2.0)</li>
  * <li>1.3.1</li>

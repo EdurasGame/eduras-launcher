@@ -49,8 +49,7 @@ public class UpdateExtractor extends SwingWorker<Boolean, Void> {
 			EdurasLauncher.CONFIG.set(change.getKey(), change.getValue());
 		}
 
-		EdurasLauncher.CONFIG
-				.set(EdurasLauncher.KEY_CLIENTNOTE, info.getNote());
+		EdurasLauncher.CONFIG.set(ConfigParser.KEY_CLIENTNOTE, info.getNote());
 		try {
 			EdurasLauncher.CONFIG.save();
 		} catch (IOException e) {

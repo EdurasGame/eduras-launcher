@@ -8,6 +8,7 @@ import java.io.IOException;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import de.illonis.eduras.launcher.gui.DownloadProgressListener;
 import de.illonis.eduras.launcher.gui.LauncherGui;
@@ -21,6 +22,12 @@ import de.illonis.eduras.launcher.network.VersionCheckReceiver;
 import de.illonis.eduras.launcher.network.VersionChecker;
 import de.illonis.eduras.launcher.network.VersionInformation;
 
+/**
+ * A game launcher that updates the game automatically at startup.
+ * 
+ * @author illonis
+ * 
+ */
 public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 		DownloadProgressListener, ExtractProgressListener,
 		LauncherUpdateListener, RepairProgressListener {
@@ -36,25 +43,29 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 	public final static VersionNumber LAUNCHER_VERSION = new VersionNumber(
 			"1.6");
 	public final static ConfigParser CONFIG = new ConfigParser();
-	public final static String KEY_LAUNCHERNOTE = "launchernote";
-	public final static String KEY_CLIENTNOTE = "clientnote";
 
 	private final LauncherGui gui;
 	private VersionInformation updateInfo;
 	private ReleaseChannel releaseChannel = ReleaseChannel.STABLE;
 
 	public static void main(String[] args) {
-		System.out.println("launched");
 		System.out.println("Launcher v " + LAUNCHER_VERSION);
 		try {
 			CONFIG.load();
 		} catch (ParseException e) {
 		}
-		EdurasLauncher launcher = new EdurasLauncher();
-		launcher.startAndShowGui();
+
+		// Schedule a job for the event-dispatching thread:
+		// creating and showing this application's GUI.
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				EdurasLauncher launcher = new EdurasLauncher();
+				launcher.startAndShowGui();
+			}
+		});
 	}
 
-	public EdurasLauncher() {
+	private EdurasLauncher() {
 		releaseChannel = CONFIG.getReleaseChannel();
 		gui = new LauncherGui(this);
 	}
@@ -69,10 +80,10 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 		// read local version
 		gui.setVersion(getVersion());
 
-		String val = CONFIG.getValue(KEY_LAUNCHERNOTE, "");
+		String val = CONFIG.getValue(ConfigParser.KEY_LAUNCHERNOTE, "");
 		if (!val.isEmpty()) {
 			gui.showMessage("Launcher updated", val);
-			CONFIG.set(KEY_LAUNCHERNOTE, "");
+			CONFIG.set(ConfigParser.KEY_LAUNCHERNOTE, "");
 			try {
 				CONFIG.save();
 			} catch (IOException e) {
@@ -118,6 +129,9 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 		gui.setRepairButtonEnabled(true);
 	}
 
+	/**
+	 * @return current launcher version.
+	 */
 	public VersionNumber getVersion() {
 		return CONFIG.getVersion();
 	}
@@ -197,10 +211,10 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 		if (getVersion() == updateInfo.getVersion()) {
 			gui.setStatus("Update completed.");
 			gui.ready();
-			String val = CONFIG.getValue(KEY_CLIENTNOTE, "");
+			String val = CONFIG.getValue(ConfigParser.KEY_CLIENTNOTE, "");
 			if (!val.isEmpty()) {
 				gui.showMessage("Client updated", val);
-				CONFIG.set(KEY_CLIENTNOTE, "");
+				CONFIG.set(ConfigParser.KEY_CLIENTNOTE, "");
 				try {
 					CONFIG.save();
 				} catch (IOException e) {
@@ -274,7 +288,7 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 
 		gui.setButtonsEnabled(false);
 		gui.setStatus("Updating game launcher...");
-		CONFIG.set(KEY_LAUNCHERNOTE, newVersion.getNote());
+		CONFIG.set(ConfigParser.KEY_LAUNCHERNOTE, newVersion.getNote());
 		try {
 			CONFIG.save();
 		} catch (IOException e) {

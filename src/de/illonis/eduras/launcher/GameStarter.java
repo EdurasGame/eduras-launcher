@@ -12,22 +12,34 @@ import javax.swing.JOptionPane;
 
 import de.illonis.eduras.launcher.tools.PathFinder;
 
+/**
+ * Starts a runnable jar file.
+ * 
+ * @author illonis
+ * 
+ */
 public class GameStarter extends Thread {
 
 	private String execString;
 	private LinkedList<String> args = new LinkedList<String>();
 
 	public GameStarter(URI jarFile) {
+		super("GameStarter");
 		String path = new File(jarFile).getAbsolutePath();
 		execString = "java -jar " + path;
 	}
 
 	public GameStarter(String targetName) {
-		super("GameStarter");
-		URI uri = PathFinder.findFile(targetName);
-		execString = "java -jar " + new File(uri).getAbsolutePath();
+		this(PathFinder.findFile(targetName));
 	}
 
+	/**
+	 * Sets the command line arguments used when executing the jar. This has to
+	 * be set before thread is started.
+	 * 
+	 * @param args
+	 *            any number of arguments.
+	 */
 	public void setArguments(String... args) {
 		for (int i = 0; i < args.length; i++) {
 			this.args.add(args[i]);

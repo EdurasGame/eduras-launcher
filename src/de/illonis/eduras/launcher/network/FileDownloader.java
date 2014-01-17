@@ -41,7 +41,7 @@ public class FileDownloader extends SwingWorker<Void, Void> {
 	protected Void doInBackground() {
 		System.out.println("Started downloader for " + source.toString()
 				+ " to " + target.getPath());
-
+		// download file and validate if download succeeded
 		ok = download() && validate();
 		return null;
 	}
@@ -85,7 +85,8 @@ public class FileDownloader extends SwingWorker<Void, Void> {
 	}
 
 	private boolean validate() {
-		boolean ok = DownloadFile.validateHash(Paths.get(target), file.getHash());
+		boolean ok = DownloadFile.validateHash(Paths.get(target),
+				file.getHash());
 		if (!ok)
 			error = new HashTestException(file.getFileName());
 		return ok;

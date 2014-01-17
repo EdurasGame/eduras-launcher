@@ -1,5 +1,11 @@
 package de.illonis.eduras.launcher.network;
 
+/**
+ * A config change dataset.
+ * 
+ * @author illonis
+ * 
+ */
 public class ConfigChange {
 
 	private final String key;

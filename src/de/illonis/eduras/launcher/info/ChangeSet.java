@@ -5,6 +5,12 @@ import java.util.LinkedList;
 import de.illonis.eduras.launcher.network.ConfigChange;
 import de.illonis.eduras.launcher.network.DownloadFile;
 
+/**
+ * Contains data of an update changeset.
+ * 
+ * @author illonis
+ * 
+ */
 public class ChangeSet {
 
 	private final VersionNumber from;

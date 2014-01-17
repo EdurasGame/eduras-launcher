@@ -7,12 +7,28 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * Holds dataset for a downloaded file.
+ * 
+ * @author illonis
+ * 
+ */
 public final class DownloadFile {
 
 	private final String fileName;
 	private final long fileSize;
 	private final String sha256;
 
+	/**
+	 * Creates a new object.
+	 * 
+	 * @param name
+	 *            the filename (without path).
+	 * @param size
+	 *            the filesize in bytes.
+	 * @param hash
+	 *            the SHA-256 hash value of that file.
+	 */
 	public DownloadFile(String name, long size, String hash) {
 		this.fileName = name;
 		this.fileSize = size;
@@ -23,6 +39,9 @@ public final class DownloadFile {
 		return fileName;
 	}
 
+	/**
+	 * @return filesize in bytes.
+	 */
 	public long getFileSize() {
 		return fileSize;
 	}

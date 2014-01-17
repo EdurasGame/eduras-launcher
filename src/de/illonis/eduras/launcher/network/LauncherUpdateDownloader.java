@@ -7,6 +7,12 @@ import javax.swing.SwingWorker;
 
 import de.illonis.eduras.launcher.GameStarter;
 
+/**
+ * Downloads a launcher update and initiates launcher update after downloading.
+ * 
+ * @author illonis
+ * 
+ */
 public class LauncherUpdateDownloader extends SwingWorker<Void, Void> {
 
 	private final LauncherUpdateInfo info;
