@@ -34,6 +34,10 @@ public class VersionChecker {
 	public final static String NIGHTLY_VERSION_URL = "http://illonis.dyndns.org/eduras/update/nightly.php";
 	public final static String STABLE_VERSION_URL = "http://illonis.dyndns.org/eduras/update/version.xml";
 	public final static String BETA_VERSION_URL = "http://illonis.dyndns.org/eduras/update/beta.xml";
+	public final static String LAUNCHER_URL = "http://illonis.dyndns.org/eduras/update/launcher.xml";
+
+	private final static DocumentBuilderFactory docFactory = DocumentBuilderFactory
+			.newInstance();
 
 	private final VersionCheckReceiver receiver;
 	public final static DateFormat DATE_FORMAT = new SimpleDateFormat(
@@ -67,8 +71,6 @@ public class VersionChecker {
 			throws ParserConfigurationException, MalformedURLException,
 			SAXException, IOException {
 
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		DocumentBuilder db = dbf.newDocumentBuilder();
 		String updateUrl;
 		switch (channel) {
 		case BETA:
@@ -82,8 +84,14 @@ public class VersionChecker {
 			break;
 
 		}
-		Document doc = db.parse(new URL(updateUrl).openStream());
-		return doc;
+
+		return getUpdateInfo(updateUrl);
+	}
+
+	private Document getUpdateInfo(String updateUrl)
+			throws ParserConfigurationException, SAXException, IOException {
+		DocumentBuilder db = docFactory.newDocumentBuilder();
+		return db.parse(new URL(updateUrl).openStream());
 	}
 
 	private VersionInformation getServerVersion(ReleaseChannel channel)
@@ -103,33 +111,6 @@ public class VersionChecker {
 		String gameJar = getNodeValue(docElement, "gameJar");
 
 		VersionNumber launcherVersion = null;
-
-		LauncherUpdateInfo lui = new LauncherUpdateInfo();
-		try {
-			NodeList launcherData = docElement.getElementsByTagName("launcher");
-			Node launcherNode = launcherData.item(0);
-			if (launcherNode instanceof Element) {
-				Element e = (Element) launcherNode;
-				String launcherName = getNodeValue(e, "name");
-				String updater = getNodeValue(e, "updater");
-				String note;
-				try {
-					note = getNodeValue(e, "note");
-				} catch (NodeNotFoundException ne) {
-					note = "";
-				}
-
-				long size = Long.parseLong(getNodeValue(e, "size"));
-				long updatersize = Long
-						.parseLong(getNodeValue(e, "updatersize"));
-				String baseUrl = getNodeValue(e, "baseUrl");
-
-				launcherVersion = new VersionNumber(getNodeValue(e, "version"));
-				lui = new LauncherUpdateInfo(note, launcherVersion, updater,
-						baseUrl, launcherName, size, updatersize);
-			}
-		} catch (NodeNotFoundException e) {
-		}
 
 		String releaseDate = getNodeValue(docElement, "releaseDate");
 
@@ -277,13 +258,24 @@ public class VersionChecker {
 				return;
 			}
 			VersionInformation serverVersion;
+			LauncherUpdateInfo launcherNewVersion;
+			try {
+				launcherNewVersion = getNewLauncherInfo();
+				if (launcherVersion.compareTo(launcherNewVersion.getVersion()) < 0) {
+					receiver.onLauncherOutdated(launcherNewVersion);
+					return;
+				}
+
+			} catch (NodeNotFoundException | UpdateException e) {
+				receiver.onUpdateError(e);
+				return;
+			}
 			try {
 				serverVersion = getServerVersion(channel);
 			} catch (NodeNotFoundException | UpdateException e) {
 				receiver.onUpdateError(e);
 				return;
 			}
-
 			updateBasics(serverVersion);
 
 			if (null != serverVersion.getLauncherInfo()
@@ -302,6 +294,43 @@ public class VersionChecker {
 			else
 				receiver.onNoUpdateRequired(serverVersion);
 
+		}
+
+		private LauncherUpdateInfo getNewLauncherInfo()
+				throws NodeNotFoundException, UpdateException {
+			Document doc;
+			try {
+				doc = getUpdateInfo(LAUNCHER_URL);
+			} catch (ParserConfigurationException | SAXException | IOException e) {
+				throw new UpdateException(e);
+			}
+			Element docElement = doc.getDocumentElement();
+
+			try {
+				NodeList launcherData = docElement.getElementsByTagName("launcher");
+				Node launcherNode = launcherData.item(0);
+				if (launcherNode instanceof Element) {
+					Element e = (Element) launcherNode;
+					String launcherName = getNodeValue(e, "name");
+					String updater = getNodeValue(e, "updater");
+					String note;
+					try {
+						note = getNodeValue(e, "note");
+					} catch (NodeNotFoundException ne) {
+						note = "";
+					}
+
+					long size = Long.parseLong(getNodeValue(e, "size"));
+					long updatersize = Long
+							.parseLong(getNodeValue(e, "updatersize"));
+					String baseUrl = getNodeValue(e, "baseUrl");
+
+					launcherVersion = new VersionNumber(getNodeValue(e, "version"));
+					return new LauncherUpdateInfo(note, launcherVersion, updater,
+							baseUrl, launcherName, size, updatersize);
+				} else {
+					throw new UpdateException(new Exception("No sufficient data for launcher update."));
+				}
 		}
 
 		private void updateBasics(VersionInformation serverVersion) {

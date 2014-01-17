@@ -36,7 +36,7 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 	}
 
 	public final static VersionNumber LAUNCHER_VERSION = new VersionNumber(
-			"2.2.3");
+			"1.6");
 	public final static ConfigParser CONFIG = new ConfigParser();
 	public final static String KEY_LAUNCHERNOTE = "launchernote";
 	public final static String KEY_CLIENTNOTE = "clientnote";

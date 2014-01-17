@@ -4,28 +4,23 @@ import de.illonis.eduras.launcher.info.VersionNumber;
 
 public class LauncherUpdateInfo {
 
-	private final String downloadName;
 	private final String note;
-	private final String updaterName;
-	private final String baseUrl;
 	private final VersionNumber version;
-	private final long fileSize;
-	private final long updaterFileSize;
+	private final String baseUrl;
+	private final DownloadFile newLauncherFile, updaterFile;
 
 	public LauncherUpdateInfo() {
-		this("", new VersionNumber("0"), "", "", "", 0, 0);
+		this("", new VersionNumber("0"), "", null, null);
 	}
 
 	public LauncherUpdateInfo(String note, VersionNumber launcherVersion,
-			String updaterName, String baseUrl, String downloadedLauncher,
-			long fileSize, long updaterFileSize) {
-		this.downloadName = downloadedLauncher;
+			String baseUrl, DownloadFile newLauncherFile,
+			DownloadFile updaterFile) {
 		this.note = note;
-		this.updaterName = updaterName;
 		this.version = launcherVersion;
-		this.fileSize = fileSize;
 		this.baseUrl = baseUrl;
-		this.updaterFileSize = updaterFileSize;
+		this.newLauncherFile = newLauncherFile;
+		this.updaterFile = updaterFile;
 	}
 
 	public String getBaseUrl() {
@@ -36,24 +31,15 @@ public class LauncherUpdateInfo {
 		return version;
 	}
 
-	public String getDownloadName() {
-		return downloadName;
-	}
-
-	public String getUpdaterName() {
-		return updaterName;
-	}
-
 	public String getNote() {
 		return note;
 	}
 
-	public long getFileSize() {
-		return fileSize;
+	public DownloadFile getNewLauncherFile() {
+		return newLauncherFile;
 	}
 
-	public long getUpdaterFileSize() {
-		return updaterFileSize;
+	public DownloadFile getUpdaterFile() {
+		return updaterFile;
 	}
-
 }

@@ -7,6 +7,12 @@ public interface ExtractProgressListener {
 	 */
 	void onExtractingFinished();
 
+	/**
+	 * Fired when extraction of update failed.
+	 * 
+	 * @param msg
+	 *            the error message.
+	 */
 	void onExtractingFailed(String msg);
 
 }
