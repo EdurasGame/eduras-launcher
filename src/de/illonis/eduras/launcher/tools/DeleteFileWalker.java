@@ -8,6 +8,12 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
+/**
+ * Cleans an installation and deletes all files.
+ * 
+ * @author illonis
+ * 
+ */
 public class DeleteFileWalker extends SimpleFileVisitor<Path> {
 
 	private final String jar;

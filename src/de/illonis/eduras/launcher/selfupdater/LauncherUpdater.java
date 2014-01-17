@@ -11,6 +11,13 @@ import javax.swing.JOptionPane;
 import de.illonis.eduras.launcher.GameStarter;
 import de.illonis.eduras.launcher.tools.PathFinder;
 
+/**
+ * An updater tool that replaces the launcher with an updated version and starts
+ * launcher again.
+ * 
+ * @author illonis
+ * 
+ */
 public class LauncherUpdater {
 
 	public static void main(String[] args) {
