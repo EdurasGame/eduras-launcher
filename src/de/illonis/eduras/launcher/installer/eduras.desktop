@@ -1,0 +1,16 @@
+[Desktop Entry]
+Version=1.0
+Name=Eduras
+Name[de]=Eduras
+GenericName=Multiplayer Game
+GenericName[de]=Mehrspielerspiel
+Comment=Online Game
+Comment[de]=Online-Spiel
+Exec=java -jar /home/illonis/eduras/eduras.jar
+Icon=/home/illonis/eduras/icon.png
+Terminal=false
+Type=Application
+StartupNotify=false
+Categories=Application;Game;
+OnlyShowIn=Unity;GNOME;XFCE;
+MimeType=text/x-java;
