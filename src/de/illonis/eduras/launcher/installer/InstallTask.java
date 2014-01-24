@@ -75,7 +75,7 @@ public class InstallTask extends SwingWorker<Boolean, Void> {
 					.getResourceAsStream("eduras.desktop");
 
 			if (input == null) {
-				System.out.println("internal setup file not found.");
+				System.out.println("internal desktop file not found.");
 				return;
 			}
 

@@ -22,26 +22,25 @@ public class PathFinder {
 	 * @return the jar's location.
 	 */
 	public static URL getBaseDir() {
-		URI uri;
 		try {
-			URL url = ClassLoader.getSystemClassLoader().getResource(".");
-			if (url != null) {
-				uri = url.toURI();
-				// (PathFinder.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-				URI parent = uri.resolve(".");
-				return parent.toURL();
+			// try another way
+			CodeSource source = PathFinder.class.getProtectionDomain()
+					.getCodeSource();
+			if (source != null) {
+				URL url2 = source.getLocation();
+				return url2;
 			} else {
-				// try another way
-				CodeSource source = PathFinder.class.getProtectionDomain()
-						.getCodeSource();
-				if (source != null) {
-					URL url2 = source.getLocation();
-					return url2;
-				} else
+				URL url = ClassLoader.getSystemClassLoader().getResource(".");
+				if (url != null) {
+					System.out.println(url);
+					URL parent = new URL(url, "../");
+					return parent;
+				} else {
 					throw new RuntimeException(
 							"Base directory could not be resolved.");
+				}
 			}
-		} catch (URISyntaxException | MalformedURLException e) {
+		} catch (MalformedURLException e) {
 			System.out.println("base dir not found.");
 			return null;
 		}

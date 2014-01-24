@@ -8,6 +8,9 @@
 	<property name="libs" value="lib/" />
 
 	<path id="launcherclasspath">
+		<fileset dir="${libs}">
+			<include name="jshortcut*" />
+		</fileset>
 		<pathelement path="${build}" />
 	</path>
 
@@ -57,6 +60,7 @@
 				<attribute name="Main-Class"
 					value="de.illonis.eduras.launcher.installer.InstallTask" />
 			</manifest>
+			
 		</jar>
 	</target>
 
@@ -80,10 +84,15 @@
 			<fileset dir="${src}">
 				<include name="**/*.png"></include>
 				<include name="**/*.gif"></include>
+				<include name="**/*.desktop"></include>
 			</fileset>
 			<fileset dir="${jars}">
 				<include name="eduras-launcher.jar"></include>
 			</fileset>
+			<fileset dir="${libs}">
+				<include name="**/*.dll"></include>
+			</fileset>
+			<zipgroupfileset dir="${libs}" includes="**/*.jar" />
 			<manifest>
 				<attribute name="Main-Class"
 					value="de.illonis.eduras.launcher.installer.EdurasInstaller" />
@@ -92,7 +101,7 @@
 	</target>
 
 	<target name="build"
-		depends="jar-launcher, jar-installtask, jar-installer, jar-lupdater, jar-sha256"
+		depends="clean, jar-launcher, jar-installtask, jar-installer, jar-lupdater, jar-sha256"
 		description="Creates launcher and installers">
 		<!-- just to combine jar creation of launcher and installer -->
 	</target>
