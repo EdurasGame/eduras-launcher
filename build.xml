@@ -2,18 +2,18 @@
 
 <project name="build_installlauncher" default="build">
 
-	<property name="base" value="../Eduras/" />
 	<property name="build" value="bin/" />
 	<property name="src" value="src/" />
-	<property name="jars" value="../dist/jars" />
+	<property name="jars" value="jar/" />
+	<property name="libs" value="lib/" />
 
 	<path id="launcherclasspath">
 		<pathelement path="${build}" />
 	</path>
 
 	<target name="compile" description="Compiles java classes.">
-		<mkdir dir="bin/" />
-		<javac srcdir="src/" destdir="${build}" includeAntRuntime="false">
+		<mkdir dir="${build}" />
+		<javac srcdir="${src}" destdir="${build}" includeAntRuntime="false">
 			<classpath refid="launcherclasspath" />
 			<include name="**/*.java" />
 		</javac>
