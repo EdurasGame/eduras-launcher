@@ -59,7 +59,7 @@ public final class SHA256Calculator extends DropTarget {
 		frame.setSize(new Dimension(450, 200));
 		frame.setLocationRelativeTo(null);
 		JLabel label = new JLabel(
-				"<html><div style=\"text-align: center;\">Drag&Drop a file here<br>to calculate it's SHA-256 hash.<br>Hash value will appear below.</div></html>",
+				"<html><div style=\"text-align: center;\">Drag&Drop a file here<br>to calculate its SHA-256 hash.<br>Hash value will appear below.</div></html>",
 				JLabel.CENTER);
 
 		label.setAlignmentX(JLabel.CENTER_ALIGNMENT);
