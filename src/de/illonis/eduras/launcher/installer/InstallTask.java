@@ -1,5 +1,6 @@
 package de.illonis.eduras.launcher.installer;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -8,8 +9,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 import javax.swing.SwingWorker;
-
-import net.jimmc.jshortcut.JShellLink;
 
 public class InstallTask extends SwingWorker<Boolean, Void> {
 
@@ -52,21 +51,19 @@ public class InstallTask extends SwingWorker<Boolean, Void> {
 	}
 
 	private void createLauncherIcon() {
+
 		if (OsValidator.isWindows()) {
-			// Create a desktop icon for eduras
-			JShellLink link = new JShellLink();
-			Path targetJar = target.resolve(INSTALL_JAR);
-
-			String filePath = "java -jar " + targetJar.toString();
-
-			try {
-				link.setFolder(JShellLink.getDirectory("desktop"));
-				link.setName("Eduras");
-				link.setPath(filePath);
-				link.save();
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
+			/*
+			 * copyDllsToTemp(); // Create a desktop icon for eduras JShellLink
+			 * link = new JShellLink(); Path targetJar =
+			 * target.resolve(INSTALL_JAR);
+			 * 
+			 * String filePath = "java -jar " + targetJar.toString();
+			 * 
+			 * try { link.setFolder(JShellLink.getDirectory("desktop"));
+			 * link.setName("Eduras"); link.setPath(filePath); link.save(); }
+			 * catch (Exception ex) { ex.printStackTrace(); }
+			 */
 		} else if (OsValidator.isUnix()) {
 			// ubuntu case
 			String dir = ".local/share/applications/";
@@ -91,6 +88,33 @@ public class InstallTask extends SwingWorker<Boolean, Void> {
 			}
 
 		}
+	}
+
+	private void copyDllsToTemp() {
+		String[] dllFiles = { "jshortcut.dll", "jshortcut_x86.dll",
+				"jshortcut_amd64.dll", "jshortcut_ia64.dll" };
+		String tmpDir = System.getProperty("java.io.tmpdir");
+
+		for (String file : dllFiles) {
+			InputStream dllInput = getClass().getResourceAsStream("/" + file);
+
+			if (dllInput == null) {
+				System.out.println("internal dll file not found:" + file);
+				return;
+			}
+
+			Path dllJar = Paths.get(tmpDir + File.separator + file);
+			try {
+				Files.copy(dllInput, dllJar,
+						StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				error = e.getMessage();
+				e.printStackTrace();
+				return;
+			}
+		}
+
+		System.setProperty("JSHORTCUT_HOME", tmpDir);
 	}
 
 	public static void main(String[] args) {
