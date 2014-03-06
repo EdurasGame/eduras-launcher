@@ -49,20 +49,6 @@
 			</manifest>
 		</jar>
 	</target>
-	
-	<target name="jar-installtask" depends="compile"
-		description="Creates launcher updater jar">
-		<jar destfile="${jars}/tools/installtask.jar" basedir="${build}" includes="**/*.class">
-		    <fileset dir="${src}">
-				<include name="**/*.desktop"></include>
-			</fileset>
-			<manifest>
-				<attribute name="Main-Class"
-					value="de.illonis.eduras.launcher.installer.InstallTask" />
-			</manifest>
-			
-		</jar>
-	</target>
 
 	<target name="jar-sha256" depends="compile"
 		description="Creates SHA-256 calculator jar">
