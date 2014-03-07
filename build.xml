@@ -87,7 +87,7 @@
 	</target>
 
 	<target name="build"
-		depends="clean, jar-launcher, jar-installtask, jar-installer, jar-lupdater, jar-sha256"
+		depends="clean, jar-launcher,jar-installer, jar-lupdater, jar-sha256"
 		description="Creates launcher and installers">
 		<!-- just to combine jar creation of launcher and installer -->
 	</target>
