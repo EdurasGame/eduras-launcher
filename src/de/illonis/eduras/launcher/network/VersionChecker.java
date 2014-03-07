@@ -31,9 +31,9 @@ import de.illonis.eduras.launcher.info.VersionNumber;
  * 
  */
 public class VersionChecker {
-	public final static String NIGHTLY_VERSION_URL = "http://illonis.dyndns.org/eduras/update/nightly.php";
-	public final static String STABLE_VERSION_URL = "http://illonis.dyndns.org/eduras/update/version.xml";
-	public final static String BETA_VERSION_URL = "http://illonis.dyndns.org/eduras/update/beta.xml";
+	public final static String NIGHTLY_VERSION_URL = "http://illonis.dyndns.org/eduras/update/version.php?c=nightly";
+	public final static String STABLE_VERSION_URL = "http://illonis.dyndns.org/eduras/update/version.php?c=release";
+	public final static String BETA_VERSION_URL = "http://illonis.dyndns.org/eduras/update/version.php?c=beta";
 	public final static String LAUNCHER_URL = "http://illonis.dyndns.org/eduras/update/launcher.xml";
 
 	private final static DocumentBuilderFactory docFactory = DocumentBuilderFactory
