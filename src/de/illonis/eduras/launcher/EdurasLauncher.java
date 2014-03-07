@@ -41,7 +41,7 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 	}
 
 	public final static VersionNumber LAUNCHER_VERSION = new VersionNumber(
-			"1.6");
+			"1.7");
 	public final static ConfigParser CONFIG = new ConfigParser();
 
 	private final LauncherGui gui;
@@ -166,6 +166,7 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 		this.releaseChannel = releaseChannel;
 		System.out.println("Set release channel to " + releaseChannel);
 		CONFIG.setRelease(releaseChannel);
+		CONFIG.setVersion(new VersionNumber("0"));
 		try {
 			CONFIG.save();
 		} catch (IOException e) {
