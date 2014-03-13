@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.io.IOException;
+import java.sql.Date;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -166,7 +167,7 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 		this.releaseChannel = releaseChannel;
 		System.out.println("Set release channel to " + releaseChannel);
 		CONFIG.setRelease(releaseChannel);
-		CONFIG.setVersion(new VersionNumber("0"));
+		CONFIG.setVersion(new VersionNumber("0", new Date(0)));
 		try {
 			CONFIG.save();
 		} catch (IOException e) {
