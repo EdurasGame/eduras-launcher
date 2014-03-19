@@ -1,14 +1,9 @@
 package de.illonis.eduras.launcher;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.LinkedList;
-
-import javax.swing.JOptionPane;
 
 import de.illonis.eduras.launcher.tools.PathFinder;
 
@@ -20,8 +15,8 @@ import de.illonis.eduras.launcher.tools.PathFinder;
  */
 public class GameStarter extends Thread {
 
-	private String execString;
-	private LinkedList<String> args = new LinkedList<String>();
+	private final String execString;
+	private final LinkedList<String> args = new LinkedList<String>();
 
 	public GameStarter(URI jarFile) {
 		super("GameStarter");
@@ -55,26 +50,7 @@ public class GameStarter extends Thread {
 
 		try {
 			System.out.println("executing: " + cmd);
-			Process proc = Runtime.getRuntime().exec(cmd);
-
-			try {
-				// wait some time until game launched
-				Thread.sleep(3000);
-			} catch (InterruptedException e) {
-				return;
-			}
-
-			// check if game launch failed
-			InputStream err = proc.getErrorStream();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					err));
-			if (reader.ready()) {
-				String line = reader.readLine();
-				JOptionPane.showMessageDialog(null, line,
-						"Error starting game", JOptionPane.ERROR_MESSAGE);
-			}
-			reader.close();
-
+			Runtime.getRuntime().exec(cmd);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
