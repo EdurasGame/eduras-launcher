@@ -40,7 +40,7 @@ public class ConfigParser {
 		CONFIG_DEFAULTS.put("nightlyUrl", VersionChecker.NIGHTLY_VERSION_URL);
 		CONFIG_DEFAULTS.put("betaUrl", VersionChecker.BETA_VERSION_URL);
 		CONFIG_DEFAULTS.put(KEY_RELEASE_CHANNEL, ReleaseChannel.STABLE.name());
-		CONFIG_DEFAULTS.put("metaserver", "http://illonis.dyndns.org:4324");
+		CONFIG_DEFAULTS.put("metaserver", "http://illonis.de:4324");
 	}
 
 	public ConfigParser() {
