@@ -36,10 +36,10 @@ public class ConfigParser {
 	static {
 		CONFIG_DEFAULTS = new HashMap<String, String>();
 		CONFIG_DEFAULTS.put("gameJar", "eduras.jar");
-		CONFIG_DEFAULTS.put("updateUrl", VersionChecker.STABLE_VERSION_URL);
+		CONFIG_DEFAULTS.put("updateUrl", VersionChecker.BETA_VERSION_URL);
 		CONFIG_DEFAULTS.put("nightlyUrl", VersionChecker.NIGHTLY_VERSION_URL);
 		CONFIG_DEFAULTS.put("betaUrl", VersionChecker.BETA_VERSION_URL);
-		CONFIG_DEFAULTS.put(KEY_RELEASE_CHANNEL, ReleaseChannel.STABLE.name());
+		CONFIG_DEFAULTS.put(KEY_RELEASE_CHANNEL, ReleaseChannel.BETA.name());
 		CONFIG_DEFAULTS.put("metaserver", "http://illonis.de:4324");
 	}
 

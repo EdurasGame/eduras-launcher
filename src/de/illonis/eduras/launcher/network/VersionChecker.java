@@ -32,7 +32,6 @@ import de.illonis.eduras.launcher.info.VersionNumber;
  */
 public class VersionChecker {
 	public final static String NIGHTLY_VERSION_URL = "http://illonis.de/eduras/update/version.php?c=nightly";
-	public final static String STABLE_VERSION_URL = "http://illonis.de/eduras/update/version.php?c=release";
 	public final static String BETA_VERSION_URL = "http://illonis.de/eduras/update/version.php?c=beta";
 	public final static String LAUNCHER_URL = "http://illonis.de/eduras/update/launcher.xml";
 
@@ -80,7 +79,7 @@ public class VersionChecker {
 			updateUrl = NIGHTLY_VERSION_URL;
 			break;
 		default:
-			updateUrl = STABLE_VERSION_URL;
+			updateUrl = BETA_VERSION_URL;
 			break;
 
 		}

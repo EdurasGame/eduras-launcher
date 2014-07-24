@@ -34,8 +34,9 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 		LauncherUpdateListener, RepairProgressListener {
 
 	public enum ReleaseChannel {
-		STABLE, BETA, NIGHTLY;
+		BETA, NIGHTLY;
 
+		@Override
 		public String toString() {
 			return name().toLowerCase();
 		}
@@ -47,7 +48,7 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 
 	private final LauncherGui gui;
 	private VersionInformation updateInfo;
-	private ReleaseChannel releaseChannel = ReleaseChannel.STABLE;
+	private ReleaseChannel releaseChannel = ReleaseChannel.BETA;
 
 	public static void main(String[] args) {
 		System.out.println("Launcher v " + LAUNCHER_VERSION);
@@ -59,6 +60,7 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 		// Schedule a job for the event-dispatching thread:
 		// creating and showing this application's GUI.
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				EdurasLauncher launcher = new EdurasLauncher();
 				launcher.startAndShowGui();
