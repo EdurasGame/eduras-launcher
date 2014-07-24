@@ -62,6 +62,7 @@ public class LauncherGui implements PropertyChangeListener {
 		repairButton = new JButton("Repair");
 		repairButton.addActionListener(launcher);
 		repairButton.setEnabled(false);
+		repairButton.setVisible(false);
 
 		bottomPanel.add(updateBar, BorderLayout.CENTER);
 		bottomPanel.add(startButton, BorderLayout.EAST);
@@ -93,6 +94,7 @@ public class LauncherGui implements PropertyChangeListener {
 		status.setText(statusMessage);
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 		int progress = (Integer) evt.getNewValue();
 		if (progress == 0) {
