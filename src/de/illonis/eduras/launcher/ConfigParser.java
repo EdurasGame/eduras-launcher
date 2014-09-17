@@ -9,7 +9,6 @@ import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
 
-import de.illonis.eduras.launcher.EdurasLauncher.ReleaseChannel;
 import de.illonis.eduras.launcher.info.VersionNumber;
 import de.illonis.eduras.launcher.network.VersionChecker;
 import de.illonis.eduras.launcher.tools.PathFinder;
@@ -29,17 +28,17 @@ public class ConfigParser {
 	private final static String KEY_RELEASE_CHANNEL = "releaseChannel";
 
 	// init default values
-	private VersionNumber version = new VersionNumber("0");
+	private String version = "0";
 	private final HashMap<String, String> otherConfigs;
 	private final static HashMap<String, String> CONFIG_DEFAULTS;
 
 	static {
 		CONFIG_DEFAULTS = new HashMap<String, String>();
-		CONFIG_DEFAULTS.put("gameJar", "eduras.jar");
+		CONFIG_DEFAULTS.put("gameJar", "eduras-client.jar");
 		CONFIG_DEFAULTS.put("updateUrl", VersionChecker.BETA_VERSION_URL);
 		CONFIG_DEFAULTS.put("nightlyUrl", VersionChecker.NIGHTLY_VERSION_URL);
 		CONFIG_DEFAULTS.put("betaUrl", VersionChecker.BETA_VERSION_URL);
-		CONFIG_DEFAULTS.put(KEY_RELEASE_CHANNEL, ReleaseChannel.BETA.name());
+		CONFIG_DEFAULTS.put(KEY_RELEASE_CHANNEL, "release");
 		CONFIG_DEFAULTS.put("metaserver", "http://illonis.de:4324");
 	}
 
@@ -47,11 +46,11 @@ public class ConfigParser {
 		otherConfigs = new HashMap<String, String>(CONFIG_DEFAULTS);
 	}
 
-	void setVersion(VersionNumber versionNumber) {
-		this.version = versionNumber;
+	void setVersion(String version) {
+		this.version = version;
 	}
 
-	public VersionNumber getVersion() {
+	public String getVersion() {
 		return version;
 	}
 
@@ -86,7 +85,7 @@ public class ConfigParser {
 	 */
 	public void load() throws ParseException {
 		otherConfigs.clear();
-		version = new VersionNumber("0");
+		version = "0";
 		otherConfigs.putAll(CONFIG_DEFAULTS);
 		URI fileUri = PathFinder.findFile(CONFIG_FILE);
 		if (fileUri == null)
@@ -104,7 +103,7 @@ public class ConfigParser {
 				switch (key) {
 				case "version":
 					try {
-						version = new VersionNumber(val);
+						version = val;
 					} catch (NumberFormatException e) {
 						throw new ParseException(e);
 					}
@@ -119,7 +118,7 @@ public class ConfigParser {
 				d = VersionChecker.DATE_FORMAT.parse(getValue("releaseDate",
 						"0"));
 
-				version.setReleaseDate(d);
+			
 			} catch (java.text.ParseException e) {
 				e.printStackTrace();
 			}
@@ -149,11 +148,11 @@ public class ConfigParser {
 		return val;
 	}
 
-	public void setRelease(ReleaseChannel type) {
-		otherConfigs.put(KEY_RELEASE_CHANNEL, type.name());
+	public void setRelease(String release) {
+		otherConfigs.put(KEY_RELEASE_CHANNEL, release);
 	}
 
-	public ReleaseChannel getReleaseChannel() {
-		return ReleaseChannel.valueOf(otherConfigs.get(KEY_RELEASE_CHANNEL));
+	public String getReleaseChannel() {
+		return otherConfigs.get(KEY_RELEASE_CHANNEL);
 	}
 }

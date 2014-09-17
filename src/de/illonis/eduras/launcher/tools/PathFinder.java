@@ -6,7 +6,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.CodeSource;
+
+import de.illonis.eduras.launcher.EdurasLauncher;
 
 /**
  * Simplifies resource locating.
@@ -32,7 +36,6 @@ public class PathFinder {
 			} else {
 				URL url = ClassLoader.getSystemClassLoader().getResource(".");
 				if (url != null) {
-					System.out.println(url);
 					URL parent = new URL(url, "../");
 					return parent;
 				} else {
@@ -44,6 +47,11 @@ public class PathFinder {
 			System.out.println("base dir not found.");
 			return null;
 		}
+	}
+
+	public static Path getDataPath() throws URISyntaxException {
+		Path p = Paths.get(getBaseDir().toURI());
+		return p.resolve(EdurasLauncher.DATA_PATH);
 	}
 
 	/**

@@ -1,10 +1,12 @@
 package de.illonis.eduras.launcher.gui;
 
 import java.awt.BorderLayout;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Collection;
 
 import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -14,92 +16,90 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
 import de.illonis.eduras.launcher.EdurasLauncher;
-import de.illonis.eduras.launcher.EdurasLauncher.ReleaseChannel;
 import de.illonis.eduras.launcher.gui.images.ImageFiler;
-import de.illonis.eduras.launcher.info.VersionNumber;
 
-public class LauncherGui implements PropertyChangeListener {
+public class LauncherGui extends JFrame implements ActionListener {
 
-	private JFrame frame;
-	private JLabel status, versionLabel;
+	private static final long serialVersionUID = 1L;
+	private JLabel progressLabel, statusLabel;
 	private JButton startButton;
-	private JButton repairButton;
 	private JProgressBar updateBar;
-	private JComboBox<ReleaseChannel> releaseSelect;
+	private JComboBox<String> releaseSelect;
+	private DefaultComboBoxModel<String> releases;
+	private final EdurasLauncher launcher;
 
 	public LauncherGui(EdurasLauncher launcher) {
-		buildGui(launcher);
+		super();
+		this.launcher = launcher;
+		buildGui();
 	}
 
-	public void show() {
-		frame.setLocationRelativeTo(null);
-		frame.setVisible(true);
+	@Override
+	public void setVisible(boolean b) {
+		setLocationRelativeTo(null);
+		super.setVisible(b);
 	}
 
-	private void buildGui(EdurasLauncher launcher) {
-
-		frame = new JFrame("Eduras? Launcher");
-		frame.setSize(600, 400);
-		frame.setResizable(false);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		JPanel panel = (JPanel) frame.getContentPane();
+	private void buildGui() {
+		setTitle("Eduras? Launcher");
+		setSize(600, 400);
+		setResizable(false);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		JPanel panel = (JPanel) getContentPane();
 		JLabel title = new JLabel(ImageFiler.loadIcon("logo.png"));
 		title.setBorder(BorderFactory.createEmptyBorder(30, 5, 0, 5));
 
-		versionLabel = new JLabel("checking installed version...");
-		versionLabel.setHorizontalAlignment(JLabel.CENTER);
-		versionLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 10, 5));
+		statusLabel = new JLabel("");
+		statusLabel.setHorizontalAlignment(JLabel.CENTER);
+		statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 10, 5));
 
-		status = new JLabel("checking for updates...");
-		status.setHorizontalAlignment(JLabel.CENTER);
+		progressLabel = new JLabel("");
+		progressLabel.setHorizontalAlignment(JLabel.CENTER);
 
 		JPanel bottomPanel = new JPanel(new BorderLayout());
 		updateBar = new JProgressBar();
 		updateBar.setIndeterminate(true);
 		startButton = new JButton("Start game");
 		startButton.setEnabled(false);
-		startButton.addActionListener(launcher);
-		repairButton = new JButton("Repair");
-		repairButton.addActionListener(launcher);
-		repairButton.setEnabled(false);
-		repairButton.setVisible(false);
+		startButton.addActionListener(this);
 
 		bottomPanel.add(updateBar, BorderLayout.CENTER);
 		bottomPanel.add(startButton, BorderLayout.EAST);
-		bottomPanel.add(repairButton, BorderLayout.WEST);
 
 		JPanel configPanel = new JPanel(new BorderLayout());
-		releaseSelect = new JComboBox<ReleaseChannel>(ReleaseChannel.values());
+		releases = new DefaultComboBoxModel<String>();
+		releaseSelect = new JComboBox<String>(releases);
 		configPanel.add(releaseSelect, BorderLayout.EAST);
-		releaseSelect
-				.setSelectedItem(EdurasLauncher.CONFIG.getReleaseChannel());
-
-		releaseSelect.addActionListener(launcher);
+		releaseSelect.addActionListener(this);
 
 		JPanel topPanel = new JPanel(new BorderLayout());
 		topPanel.add(configPanel, BorderLayout.NORTH);
 		topPanel.add(title, BorderLayout.CENTER);
 		JPanel labelPanel = new JPanel(new BorderLayout());
-		labelPanel.add(versionLabel, BorderLayout.NORTH);
+		labelPanel.add(statusLabel, BorderLayout.NORTH);
 
-		labelPanel.add(status, BorderLayout.SOUTH);
+		labelPanel.add(progressLabel, BorderLayout.SOUTH);
 
 		topPanel.add(labelPanel, BorderLayout.SOUTH);
 		labelPanel.setBorder(BorderFactory.createEmptyBorder(30, 5, 30, 5));
 		panel.add(topPanel, BorderLayout.CENTER);
 		panel.add(bottomPanel, BorderLayout.SOUTH);
+		disableControls();
 	}
 
-	public void setStatus(String statusMessage) {
-		status.setText(statusMessage);
+	public void setStatus(String text) {
+		statusLabel.setText(text);
 	}
 
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-		int progress = (Integer) evt.getNewValue();
+	public void setProgressLabel(String statusMessage) {
+		progressLabel.setText(statusMessage);
+	}
+
+	public void setProgress(int progress, String note) {
 		if (progress == 0) {
 			updateBar.setIndeterminate(true);
 		} else {
+			setProgressLabel(note);
 			updateBar.setString(null);
 			updateBar.setStringPainted(true);
 			updateBar.setIndeterminate(false);
@@ -107,37 +107,14 @@ public class LauncherGui implements PropertyChangeListener {
 		}
 	}
 
-	public void setStartButtonEnabled(boolean enabled) {
-		startButton.setEnabled(enabled);
-	}
-
-	public void setRepairButtonEnabled(boolean enabled) {
-		repairButton.setEnabled(enabled);
-	}
-
-	public void setButtonsEnabled(boolean enabled) {
-		setStartButtonEnabled(enabled);
-		setRepairButtonEnabled(enabled);
-	}
-
 	public void ready() {
 		updateBar.setIndeterminate(false);
 		updateBar.setValue(100);
-		setButtonsEnabled(true);
 		startButton.requestFocus();
 	}
 
-	public void setVersion(VersionNumber versionNumber) {
-		String name = EdurasLauncher.CONFIG.getValue("releaseName", "");
-		String vName = "version " + versionNumber.toString();
-		if (!name.isEmpty()) {
-			vName += " (" + name + ")";
-		}
-		versionLabel.setText(vName);
-	}
-
 	public void exit() {
-		frame.dispose();
+		dispose();
 	}
 
 	public void abortProgressBar() {
@@ -148,17 +125,48 @@ public class LauncherGui implements PropertyChangeListener {
 	}
 
 	public void showMessage(String title, String message) {
-		JOptionPane.showMessageDialog(frame, message, title,
+		JOptionPane.showMessageDialog(this, message, title,
 				JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	public int ask(String title, String message, int optionType) {
-		return JOptionPane.showConfirmDialog(frame, message, title, optionType);
+		return JOptionPane.showConfirmDialog(this, message, title, optionType);
 	}
 
 	public void showError(String title, String message) {
-		JOptionPane.showMessageDialog(frame, message, title,
+		JOptionPane.showMessageDialog(this, message, title,
 				JOptionPane.ERROR_MESSAGE);
+	}
 
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == startButton) {
+			launcher.launchGame();
+		} else if (e.getSource() == releaseSelect && releaseSelect.isEnabled()) {
+			String release = (String) releaseSelect.getSelectedItem();
+			if (release != null)
+				launcher.setRelease(release);
+		}
+	}
+
+	public void disableControls() {
+		startButton.setEnabled(false);
+		releaseSelect.setEnabled(false);
+	}
+
+	public void enableControls() {
+		startButton.setEnabled(true);
+		releaseSelect.setEnabled(true);
+	}
+
+	public void setChannelList(Collection<String> channels, String current) {
+		releases.removeAllElements();
+		for (String channel : channels) {
+			releases.addElement(channel);
+		}
+		if (releases.getIndexOf(current) >= 0) {
+			releaseSelect.setSelectedItem(current);
+		} else
+			releaseSelect.setSelectedIndex(-1);
 	}
 }

@@ -1,27 +1,26 @@
 package de.illonis.eduras.launcher;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.io.IOException;
-import java.sql.Date;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collection;
 
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
-import de.illonis.eduras.launcher.gui.DownloadProgressListener;
 import de.illonis.eduras.launcher.gui.LauncherGui;
-import de.illonis.eduras.launcher.info.ChangeSet;
 import de.illonis.eduras.launcher.info.VersionNumber;
-import de.illonis.eduras.launcher.network.LauncherUpdateDownloader;
-import de.illonis.eduras.launcher.network.LauncherUpdateInfo;
-import de.illonis.eduras.launcher.network.LauncherUpdateListener;
-import de.illonis.eduras.launcher.network.UpdateDownloader;
-import de.illonis.eduras.launcher.network.VersionCheckReceiver;
-import de.illonis.eduras.launcher.network.VersionChecker;
-import de.illonis.eduras.launcher.network.VersionInformation;
+import de.illonis.eduras.launcher.tools.PathFinder;
+import de.illonis.newup.client.ChannelListener;
+import de.illonis.newup.client.NeWUpClient;
+import de.illonis.newup.client.UpdateException;
+import de.illonis.newup.client.UpdateException.ErrorType;
+import de.illonis.newup.client.UpdateListener;
+import de.illonis.newup.client.UpdateResult;
 
 /**
  * A game launcher that updates the game automatically at startup.
@@ -29,211 +28,97 @@ import de.illonis.eduras.launcher.network.VersionInformation;
  * @author illonis
  * 
  */
-public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
-		DownloadProgressListener, ExtractProgressListener,
-		LauncherUpdateListener, RepairProgressListener {
-
-	public enum ReleaseChannel {
-		BETA, NIGHTLY;
-
-		@Override
-		public String toString() {
-			return name().toLowerCase();
-		}
-	}
+public class EdurasLauncher implements UpdateListener, ChannelListener {
 
 	public final static VersionNumber LAUNCHER_VERSION = new VersionNumber(
 			"1.7");
-	public final static ConfigParser CONFIG = new ConfigParser();
+	public final static String DATA_PATH = "data/";
+	private final static String SERVER_URL = "http://192.168.0.2/newup/";
+	private static final String DEFAULT_RELEASE_CHANNEL = "stable";
+	private final static String GAME_JAR = DATA_PATH + "eduras-client.jar";
 
 	private final LauncherGui gui;
-	private VersionInformation updateInfo;
-	private ReleaseChannel releaseChannel = ReleaseChannel.BETA;
+	private String releaseChannel;
+	private final URL serverURL;
+	private final Path localPath;
 
 	public static void main(String[] args) {
+
 		System.out.println("Launcher v " + LAUNCHER_VERSION);
-		try {
-			CONFIG.load();
-		} catch (ParseException e) {
-		}
 
 		// Schedule a job for the event-dispatching thread:
 		// creating and showing this application's GUI.
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				EdurasLauncher launcher = new EdurasLauncher();
-				launcher.startAndShowGui();
+				try {
+					EdurasLauncher launcher = new EdurasLauncher();
+					launcher.startAndShowGui();
+				} catch (MalformedURLException | URISyntaxException e) {
+					e.printStackTrace();
+				}
 			}
 		});
 	}
 
-	private EdurasLauncher() {
-		releaseChannel = CONFIG.getReleaseChannel();
+	private EdurasLauncher() throws MalformedURLException, URISyntaxException {
+		serverURL = new URL(SERVER_URL);
+		localPath = PathFinder.getDataPath();
 		gui = new LauncherGui(this);
+		releaseChannel = "";
 	}
 
 	private void startAndShowGui() {
-		gui.show();
-		checkLocal();
-		check();
+		gui.addComponentListener(new ComponentListener() {
+
+			@Override
+			public void componentShown(ComponentEvent arg0) {
+				gui.setStatus("Retrieving available release channels...");
+				NeWUpClient.queryChannels(serverURL, EdurasLauncher.this);
+			}
+
+			@Override
+			public void componentResized(ComponentEvent arg0) {
+			}
+
+			@Override
+			public void componentMoved(ComponentEvent arg0) {
+			}
+
+			@Override
+			public void componentHidden(ComponentEvent arg0) {
+			}
+		});
+		gui.setVisible(true);
 	}
 
-	private void checkLocal() {
-		// read local version
-		gui.setVersion(getVersion());
-
-		String val = CONFIG.getValue(ConfigParser.KEY_LAUNCHERNOTE, "");
-		if (!val.isEmpty()) {
-			gui.showMessage("Launcher updated", val);
-			CONFIG.set(ConfigParser.KEY_LAUNCHERNOTE, "");
+	protected void startUpdateCheck(String channel) {
+		gui.disableControls();
+		if (!Files.exists(localPath)) {
 			try {
-				CONFIG.save();
+				Files.createDirectories(localPath);
 			} catch (IOException e) {
+				gui.showError("Error", "Could not create data directory.");
 				e.printStackTrace();
+				return;
 			}
 		}
+
+		gui.setStatus("Checking for updates...");
+		NeWUpClient client = new NeWUpClient(serverURL, localPath, channel);
+		client.addUpdateListener(this);
+		client.checkForUpdates(true);
 	}
 
-	private void check() {
-		gui.setButtonsEnabled(false);
-		// compare local version with server version.
-		VersionChecker vc = new VersionChecker(this);
-		vc.checkVersion(getVersion(), LAUNCHER_VERSION, releaseChannel);
+	public void setRelease(String newChannel) {
+		this.releaseChannel = newChannel;
+		System.out.println("Set release channel to " + newChannel);
+		startUpdateCheck(newChannel);
 	}
 
-	@Override
-	public void onUpdateRequired(VersionInformation info) {
-		updateInfo = info;
-		ChangeSet updateSet = updateInfo.getChangeSetFor(CONFIG.getVersion());
-
-		gui.setStatus("new version " + info.getVersion() + " - downloading "
-				+ updateSet.getNumFiles() + " file(s)");
-		UpdateDownloader downloader = new UpdateDownloader(updateSet, this);
-		downloader.execute();
-	}
-
-	@Override
-	public void onNoUpdateRequired(VersionInformation info) {
-		gui.setStatus("No update required.");
-		// String updater = info.getLauncherInfo().getUpdaterName();
-		// if (!updater.isEmpty()) {
-		// File f = new File(PathFinder.findFile(updater));
-		// f.delete();
-		// }
-		checkLocal();
-		gui.ready();
-	}
-
-	@Override
-	public void onUpdateError(Exception e) {
-		gui.setStatus("Update error: " + e.getMessage());
-		e.printStackTrace();
-		gui.setRepairButtonEnabled(true);
-	}
-
-	/**
-	 * @return current launcher version.
-	 */
-	public VersionNumber getVersion() {
-		return CONFIG.getVersion();
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() instanceof JButton) {
-			JButton button = (JButton) e.getSource();
-			if (button.getText().toLowerCase().contains("start")) {
-				// start game
-				launchGame();
-			} else {
-				// repair
-				int result = gui
-						.ask("Repair game",
-								"Do you really want to repair installation?\n"
-										+ "This will download all files again and may overwrite changes in your config.ini.",
-								JOptionPane.YES_NO_OPTION);
-
-				if (result == JOptionPane.YES_OPTION)
-					repair();
-			}
-		} else {
-			JComboBox<?> cb = (JComboBox<?>) e.getSource();
-			ReleaseChannel release = ((ReleaseChannel) cb.getSelectedItem());
-			if (release != null)
-				setRelease(release);
-		}
-	}
-
-	private void setRelease(ReleaseChannel releaseChannel) {
-		this.releaseChannel = releaseChannel;
-		System.out.println("Set release channel to " + releaseChannel);
-		CONFIG.setRelease(releaseChannel);
-		CONFIG.setVersion(new VersionNumber("0", new Date(0)));
-		try {
-			CONFIG.save();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		check();
-	}
-
-	private void repair() {
-		gui.setStatus("Repairing...");
-		gui.setButtonsEnabled(false);
-		RepairTask task = new RepairTask(this);
-		task.addPropertyChangeListener(this);
-		task.execute();
-	}
-
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-		if ("progress" == evt.getPropertyName()) {
-			gui.propertyChange(evt);
-		}
-	}
-
-	@Override
-	public void onDownloadFinished() {
-		ChangeSet updateSet = updateInfo.getChangeSetFor(CONFIG.getVersion());
-		gui.setStatus("Extracting files...");
-		UpdateExtractor ex = new UpdateExtractor(updateSet, this);
-		ex.execute();
-	}
-
-	@Override
-	public void onDownloadError(String msg) {
-		gui.showMessage("Download error", "Error while updating.\n"
-				+ "Try again later or redownload Eduras manually.\n\n" + msg);
-		gui.setStatus("An error occured while updating: " + msg);
-		gui.setRepairButtonEnabled(true);
-	}
-
-	@Override
-	public void onExtractingFinished() {
-		checkLocal();
-		if (getVersion() == updateInfo.getVersion()) {
-			gui.setStatus("Update completed.");
-			gui.ready();
-			String val = CONFIG.getValue(ConfigParser.KEY_CLIENTNOTE, "");
-			if (!val.isEmpty()) {
-				gui.showMessage("Client updated", val);
-				CONFIG.set(ConfigParser.KEY_CLIENTNOTE, "");
-				try {
-					CONFIG.save();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			updateInfo = null;
-		} else {
-			check();
-		}
-	}
-
-	private void launchGame() {
+	public void launchGame() {
 		gui.setStatus("Starting game...");
-		gui.setButtonsEnabled(false);
+		gui.disableControls();
 		LaunchThread launcher = new LaunchThread();
 		launcher.start();
 	}
@@ -246,66 +131,99 @@ public class EdurasLauncher implements ActionListener, VersionCheckReceiver,
 
 		@Override
 		public void run() {
-			String jarObj = EdurasLauncher.CONFIG.getValue("gameJar");
-			if (jarObj == null)
-				return;
-
-			GameStarter starter = new GameStarter(jarObj);
+			GameStarter starter = new GameStarter(gui, GAME_JAR);
 			starter.start();
 			try {
 				starter.join();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-
-			gui.exit();
+			gui.setStatus("Ready to play");
+			gui.enableControls();
 		}
 	}
 
-	@Override
-	public void onExtractingFailed(String msg) {
-		gui.showMessage("Extraction error", "Error while updating.\n"
-				+ "Make sure your game folder is writable.\n\n" + msg);
-		gui.setStatus("An error occured while extracting: " + msg);
-	}
-
-	@Override
-	public void onRepairCompleted() {
-		try {
-			CONFIG.load();
-		} catch (ParseException e) {
-		}
-		gui.setStatus("Redownloading files...");
-		checkLocal();
-		check();
-	}
-
-	@Override
-	public void onRepairFailed() {
-		gui.setStatus("Repairing failed.");
-		gui.abortProgressBar();
-		gui.setButtonsEnabled(true);
-	}
-
-	@Override
-	public void onLauncherOutdated(LauncherUpdateInfo newVersion) {
-
-		gui.setButtonsEnabled(false);
-		gui.setStatus("Updating game launcher...");
-		CONFIG.set(ConfigParser.KEY_LAUNCHERNOTE, newVersion.getNote());
-		try {
-			CONFIG.save();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		LauncherUpdateDownloader l = new LauncherUpdateDownloader(this,
-				newVersion);
-		l.execute();
-	}
-
-	@Override
 	public void exitLauncher() {
 		gui.setStatus("Restarting launcher...");
 		gui.exit();
+	}
+
+	@Override
+	public void onUpdateCompleted(UpdateResult result) {
+		releaseChannel = result.getChannel();
+		if (result.getNewFilesAmount() == 0) {
+			gui.setStatus("No update required.");
+		} else {
+			gui.setStatus("Update completed.");
+			if (!result.getNotice().isEmpty())
+				gui.showMessage("Update information", result.getNotice());
+		}
+		gui.setProgress(100,
+				result.getServerVersion() + " (" + result.getServerTag() + ")");
+		gui.enableControls();
+	}
+
+	@Override
+	public void onUpdateInfoReceived(UpdateResult result) {
+		// unused
+	}
+
+	@Override
+	public void onUpdateError(UpdateException e) {
+		e.printStackTrace();
+		if (e.getType() == ErrorType.INVALID_CHANNEL) {
+			gui.showError(
+					"Invalid channel",
+					"Selected releasechannel is not available. Please select another one from list.");
+			gui.enableControls();
+			gui.setStatus("");
+			gui.setProgress(-1, "No channel selected.");
+		} else {
+			gui.showError("Update error", e.getMessage());
+			gui.setStatus("Update error");
+			gui.setProgress(-1, e.getMessage());
+		}
+	}
+
+	@Override
+	public void onNetworkError(IOException e) {
+		e.printStackTrace();
+		gui.showError("Network error", e.getMessage());
+		gui.setStatus("Network error");
+		gui.setProgress(-1, e.getMessage());
+	}
+
+	@Override
+	public void updateProgress(int progress, String note) {
+		gui.setProgress(progress, note);
+	}
+
+	@Override
+	public void onUpdateCancelled() {
+		gui.setProgress(1, "Update cancelled");
+		// TODO: ka
+	}
+
+	@Override
+	public void onChannelListReceived(Collection<String> channels) {
+		gui.setStatus("Reading local version...");
+		try {
+			String localRelease = NeWUpClient.getLocalChannel(localPath);
+			if (!localRelease.isEmpty()) {
+				releaseChannel = localRelease;
+			} else {
+				releaseChannel = DEFAULT_RELEASE_CHANNEL;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			releaseChannel = DEFAULT_RELEASE_CHANNEL;
+		}
+		gui.setChannelList(channels, releaseChannel);
+		startUpdateCheck(releaseChannel);
+	}
+
+	@Override
+	public void onError(Exception e) {
+		gui.showError("Error", "Could not get available release channels.");
 	}
 }
