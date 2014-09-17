@@ -32,7 +32,7 @@ public class EdurasLauncher implements UpdateListener, ChannelListener {
 
 	public final static VersionNumber LAUNCHER_VERSION = new VersionNumber(
 			"1.7");
-	public final static String DATA_PATH = "data/";
+	public final static String DATA_PATH = "game/";
 	private final static String SERVER_URL = "http://192.168.0.2/newup/";
 	private static final String DEFAULT_RELEASE_CHANNEL = "stable";
 	private final static String GAME_JAR = DATA_PATH + "eduras-client.jar";
@@ -214,7 +214,7 @@ public class EdurasLauncher implements UpdateListener, ChannelListener {
 		gui.setStatus("Reading local version...");
 		try {
 			String localRelease = NeWUpClient.getLocalChannel(localPath);
-			if (!localRelease.isEmpty()) {
+			if (!localRelease.isEmpty() && localRelease != "n/a") {
 				releaseChannel = localRelease;
 			} else {
 				releaseChannel = DEFAULT_RELEASE_CHANNEL;
