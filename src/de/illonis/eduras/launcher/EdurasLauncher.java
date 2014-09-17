@@ -155,12 +155,17 @@ public class EdurasLauncher implements UpdateListener, ChannelListener {
 			gui.setStatus("No update required.");
 		} else {
 			gui.setStatus("Update completed.");
+			afterEdurasUpdate();
 			if (!result.getNotice().isEmpty())
 				gui.showMessage("Update information", result.getNotice());
 		}
 		gui.setProgress(100,
 				result.getServerVersion() + " (" + result.getServerTag() + ")");
 		gui.enableControls();
+	}
+
+	private void afterEdurasUpdate() {
+		// TODO add eduras specific things
 	}
 
 	@Override

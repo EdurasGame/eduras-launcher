@@ -3,13 +3,13 @@ package de.illonis.eduras.launcher.installer;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-
-import de.illonis.eduras.launcher.GameStarter;
 
 public class DonePanel extends JPanel implements ActionListener {
 
@@ -33,11 +33,20 @@ public class DonePanel extends JPanel implements ActionListener {
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
-		GameStarter s = new GameStarter(target.toUri());
+	public void actionPerformed(ActionEvent event) {
+		String path = new File(target.toUri()).getAbsolutePath();
+		String[] cmdargs = new String[3];
+		cmdargs[0] = "java";
+		cmdargs[1] = "-jar";
+		cmdargs[2] = path;
 		startButton.setText("Starting...");
 		startButton.setEnabled(false);
-		s.start();
+		try {
+			Process p = Runtime.getRuntime().exec(cmdargs);
+		} catch (IOException e) {
+			infoLabel
+					.setText("Error starting launcher. Try starting manually.");
+		}
 	}
 
 	public void setPath(Path targetPath) {

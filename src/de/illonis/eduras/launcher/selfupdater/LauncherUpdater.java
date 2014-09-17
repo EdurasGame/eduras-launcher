@@ -1,5 +1,6 @@
 package de.illonis.eduras.launcher.selfupdater;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -8,7 +9,6 @@ import java.nio.file.StandardCopyOption;
 
 import javax.swing.JOptionPane;
 
-import de.illonis.eduras.launcher.GameStarter;
 import de.illonis.eduras.launcher.tools.PathFinder;
 
 /**
@@ -48,11 +48,15 @@ public class LauncherUpdater {
 				e.printStackTrace();
 			}
 			System.out.println("Starting launcher");
-			GameStarter st = new GameStarter(targetName);
-			st.start();
+			String path = new File(PathFinder.findFile(targetName))
+					.getAbsolutePath();
+			String[] cmdargs = new String[3];
+			cmdargs[0] = "java";
+			cmdargs[1] = "-jar";
+			cmdargs[2] = path;
 			try {
-				st.join();
-			} catch (InterruptedException e) {
+				Runtime.getRuntime().exec(cmdargs);
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
