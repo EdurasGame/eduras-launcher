@@ -31,10 +31,10 @@ import de.illonis.newup.client.UpdateResult;
 public class EdurasLauncher implements UpdateListener, ChannelListener {
 
 	public final static VersionNumber LAUNCHER_VERSION = new VersionNumber(
-			"1.7");
+			"2.0");
 	public final static String DATA_PATH = "game/";
-	private final static String SERVER_URL = "http://192.168.0.2/newup/";
-	private static final String DEFAULT_RELEASE_CHANNEL = "stable";
+	private final static String SERVER_URL = "http://illonis.de/newup/";
+	private static final String DEFAULT_RELEASE_CHANNEL = "beta";
 	private final static String GAME_JAR = DATA_PATH + "eduras-client.jar";
 
 	private final LauncherGui gui;
@@ -179,7 +179,9 @@ public class EdurasLauncher implements UpdateListener, ChannelListener {
 		if (e.getType() == ErrorType.INVALID_CHANNEL) {
 			gui.showError(
 					"Invalid channel",
-					"Selected releasechannel is not available. Please select another one from list.");
+					"Releasechannel \""
+							+ releaseChannel
+							+ "\" is not available. Please select another one from list.");
 			gui.enableControls();
 			gui.setStatus("");
 			gui.setProgress(-1, "No channel selected.");
