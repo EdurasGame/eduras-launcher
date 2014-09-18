@@ -177,7 +177,6 @@ public class LauncherGui extends JFrame implements ActionListener {
 	public void enableControls() {
 		startButton.setEnabled(true);
 		releaseSelect.setEnabled(true);
-
 		startButton.requestFocus();
 	}
 
@@ -190,5 +189,9 @@ public class LauncherGui extends JFrame implements ActionListener {
 			releaseSelect.setSelectedItem(current);
 		} else
 			releaseSelect.setSelectedIndex(-1);
+	}
+
+	public void disableStart() {
+		startButton.setEnabled(false);
 	}
 }

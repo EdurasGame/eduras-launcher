@@ -221,6 +221,7 @@ public class EdurasLauncher implements UpdateListener, ChannelListener {
 							+ releaseChannel
 							+ "\" is not available. Please select another one from list.");
 			gui.enableControls();
+			gui.disableStart();
 			gui.setStatus("");
 			gui.setProgress(-1, "No channel selected.");
 		} else {

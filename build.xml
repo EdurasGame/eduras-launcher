@@ -27,7 +27,7 @@
 	</target>
 
 	<target name="jar-launcher" depends="compile" description="Creates launcher jar">
-		<jar destfile="${jars}/eduras-launcher.jar" basedir="${build}"
+		<jar destfile="${jars}/eduras.jar" basedir="${build}"
 			includes="**/*.class">
 			<fileset dir="${src}">
 				<include name="**/*.png"></include>
