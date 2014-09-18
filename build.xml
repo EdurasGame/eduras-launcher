@@ -9,7 +9,7 @@
 
 	<path id="launcherclasspath">
 		<fileset dir="${libs}">
-			<include name="jshortcut*" />
+			<include name="newup*" />
 		</fileset>
 		<pathelement path="${build}" />
 	</path>
@@ -75,10 +75,6 @@
 			<fileset dir="${jars}">
 				<include name="eduras-launcher.jar"></include>
 			</fileset>
-			<fileset dir="${libs}">
-				<include name="**/*.dll"></include>
-			</fileset>
-			<zipgroupfileset dir="${libs}" includes="**/*.jar" />
 			<manifest>
 				<attribute name="Main-Class"
 					value="de.illonis.eduras.launcher.installer.EdurasInstaller" />
