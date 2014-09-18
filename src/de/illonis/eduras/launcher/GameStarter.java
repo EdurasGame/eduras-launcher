@@ -49,10 +49,12 @@ public class GameStarter extends Thread {
 	@Override
 	public void run() {
 		gui.setStatus("Starting game..");
-		String[] cmdargs = new String[args.size() + 2];
+		String[] cmdargs = new String[args.size() + 4];
 		cmdargs[0] = "java";
-		cmdargs[1] = "-jar";
-		int i = 2;
+		cmdargs[1] = "-classpath";
+		cmdargs[2] = "game/eduras-client.jar:game/data/lib/*";
+		cmdargs[3] = "de.illonis.eduras.gameclient.EdurasClient";
+		int i = 4;
 		for (String arg : args) {
 			cmdargs[i++] = arg;
 		}
