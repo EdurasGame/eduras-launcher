@@ -13,7 +13,6 @@ import java.util.Collection;
 import javax.swing.SwingUtilities;
 
 import de.illonis.eduras.launcher.gui.LauncherGui;
-import de.illonis.eduras.launcher.info.VersionNumber;
 import de.illonis.eduras.launcher.tools.PathFinder;
 import de.illonis.newup.client.ChannelListener;
 import de.illonis.newup.client.NeWUpClient;
@@ -30,8 +29,7 @@ import de.illonis.newup.client.UpdateResult;
  */
 public class EdurasLauncher implements UpdateListener, ChannelListener {
 
-	public final static VersionNumber LAUNCHER_VERSION = new VersionNumber(
-			"2.0");
+	public final static int LAUNCHER_VERSION = 5;
 	public final static String DATA_PATH = "game/";
 	private final static String SERVER_URL = "http://illonis.de/newup/";
 	private static final String DEFAULT_RELEASE_CHANNEL = "beta";
@@ -172,13 +170,40 @@ public class EdurasLauncher implements UpdateListener, ChannelListener {
 
 	private void afterEdurasUpdate() {
 		EdurasConfigFile file = new EdurasConfigFile();
+		int launcherVersion = 0;
 		try {
 			file.load();
 			website = file.getValue(EdurasConfigFile.KEY_WEBSITE,
 					"http://www.eduras.de");
+			launcherVersion = Integer.parseInt(file.getValue(
+					EdurasConfigFile.KEY_LAUNCHERVERSION, "0"));
 		} catch (IOException | URISyntaxException e) {
 			e.printStackTrace();
 		}
+		if (launcherVersion > LAUNCHER_VERSION) {
+			// update required
+			try {
+				updateLauncher();
+			} catch (IOException | URISyntaxException e) {
+				gui.showError("Update failed", "Updating launcher failed.");
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void updateLauncher() throws IOException, URISyntaxException {
+		Path updater = PathFinder.getDataPath().resolve("lupdater.jar");
+		if (!Files.exists(updater)) {
+			return;
+		}
+		gui.setStatus("Starting launcher update...");
+		String[] cmdargs = new String[4];
+		cmdargs[0] = "java";
+		cmdargs[1] = "-jar";
+		cmdargs[2] = updater.toString();
+		cmdargs[3] = "update";
+		Runtime.getRuntime().exec(cmdargs);
+		System.exit(0);
 	}
 
 	@Override

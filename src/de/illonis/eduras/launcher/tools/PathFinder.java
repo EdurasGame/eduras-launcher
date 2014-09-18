@@ -30,6 +30,9 @@ public class PathFinder {
 					.getCodeSource();
 			if (source != null) {
 				URL url2 = source.getLocation();
+				if (url2.toString().endsWith(".jar")) {
+					return new URL(url2, ".");
+				}
 				return url2;
 			} else {
 				URL url = ClassLoader.getSystemClassLoader().getResource(".");
@@ -48,7 +51,7 @@ public class PathFinder {
 	}
 
 	public static Path getDataPath() throws URISyntaxException {
-		Path p = Paths.get(getBaseDir().toURI());
+		Path p = Paths.get(getBaseDir().getPath());
 		return p.resolve(EdurasLauncher.DATA_PATH);
 	}
 

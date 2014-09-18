@@ -24,6 +24,7 @@ public class EdurasConfigFile {
 
 	public final static String KEY_WEBSITE = "websiteUrl";
 	public final static String KEY_METASERVER = "metaUrl";
+	public static final String KEY_LAUNCHERVERSION = "launcherVersion";
 
 	private final static String CONFIG_FILENAME = "config.ini";
 	private final static HashMap<String, String> CONFIG_DEFAULTS;

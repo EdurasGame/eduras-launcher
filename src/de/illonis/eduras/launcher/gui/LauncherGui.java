@@ -78,6 +78,11 @@ public class LauncherGui extends JFrame implements ActionListener {
 		releaseSelect.addActionListener(this);
 		websiteButton = new JButton("Website");
 		websiteButton.addActionListener(this);
+		JLabel label = new JLabel("Launcher version "
+				+ EdurasLauncher.LAUNCHER_VERSION);
+		configPanel.add(label, BorderLayout.CENTER);
+		label.setFont(label.getFont().deriveFont(10f));
+		label.setHorizontalAlignment(JLabel.CENTER);
 		configPanel.add(websiteButton, BorderLayout.WEST);
 		JPanel topPanel = new JPanel(new BorderLayout());
 		topPanel.add(configPanel, BorderLayout.NORTH);

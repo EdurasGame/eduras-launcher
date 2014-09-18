@@ -33,6 +33,7 @@
 				<include name="**/*.png"></include>
 				<include name="**/*.gif"></include>
 			</fileset>
+			<zipgroupfileset dir="${libs}" includes="**/*.jar" />
 			<manifest>
 				<attribute name="Main-Class"
 					value="de.illonis.eduras.launcher.EdurasLauncher" />
