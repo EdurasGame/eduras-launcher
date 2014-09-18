@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.Scanner;
 
 import de.illonis.eduras.launcher.gui.LauncherGui;
+import de.illonis.eduras.launcher.installer.OsValidator;
 import de.illonis.eduras.launcher.tools.PathFinder;
 
 /**
@@ -52,7 +53,10 @@ public class GameStarter extends Thread {
 		String[] cmdargs = new String[args.size() + 4];
 		cmdargs[0] = "java";
 		cmdargs[1] = "-classpath";
-		cmdargs[2] = "game/eduras-client.jar:game/data/lib/*";
+		if (OsValidator.isWindows()) {
+			cmdargs[2] = "game/eduras-client.jar;game/data/lib/*";
+		} else
+			cmdargs[2] = "game/eduras-client.jar:game/data/lib/*";
 		cmdargs[3] = "de.illonis.eduras.gameclient.EdurasClient";
 		int i = 4;
 		for (String arg : args) {
