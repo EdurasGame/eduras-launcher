@@ -1,8 +1,12 @@
 package de.illonis.eduras.launcher.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 
 import javax.swing.BorderFactory;
@@ -27,6 +31,7 @@ public class LauncherGui extends JFrame implements ActionListener {
 	private JComboBox<String> releaseSelect;
 	private DefaultComboBoxModel<String> releases;
 	private final EdurasLauncher launcher;
+	private JButton websiteButton;
 
 	public LauncherGui(EdurasLauncher launcher) {
 		super();
@@ -71,7 +76,9 @@ public class LauncherGui extends JFrame implements ActionListener {
 		releaseSelect = new JComboBox<String>(releases);
 		configPanel.add(releaseSelect, BorderLayout.EAST);
 		releaseSelect.addActionListener(this);
-
+		websiteButton = new JButton("Website");
+		websiteButton.addActionListener(this);
+		configPanel.add(websiteButton, BorderLayout.WEST);
 		JPanel topPanel = new JPanel(new BorderLayout());
 		topPanel.add(configPanel, BorderLayout.NORTH);
 		topPanel.add(title, BorderLayout.CENTER);
@@ -146,6 +153,14 @@ public class LauncherGui extends JFrame implements ActionListener {
 			String release = (String) releaseSelect.getSelectedItem();
 			if (release != null)
 				launcher.setRelease(release);
+		} else if (e.getSource() == websiteButton) {
+			if (Desktop.isDesktopSupported()) {
+				try {
+					Desktop.getDesktop().browse(new URI(launcher.getWebsite()));
+				} catch (IOException | URISyntaxException e1) {
+					e1.printStackTrace();
+				}
+			}
 		}
 	}
 
@@ -157,6 +172,8 @@ public class LauncherGui extends JFrame implements ActionListener {
 	public void enableControls() {
 		startButton.setEnabled(true);
 		releaseSelect.setEnabled(true);
+
+		startButton.requestFocus();
 	}
 
 	public void setChannelList(Collection<String> channels, String current) {

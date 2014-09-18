@@ -41,6 +41,7 @@ public class EdurasLauncher implements UpdateListener, ChannelListener {
 	private String releaseChannel;
 	private final URL serverURL;
 	private final Path localPath;
+	private String website;
 
 	public static void main(String[] args) {
 
@@ -66,6 +67,11 @@ public class EdurasLauncher implements UpdateListener, ChannelListener {
 		localPath = PathFinder.getDataPath();
 		gui = new LauncherGui(this);
 		releaseChannel = "";
+		website = "http://www.eduras.de";
+	}
+
+	public String getWebsite() {
+		return website;
 	}
 
 	private void startAndShowGui() {
@@ -165,7 +171,14 @@ public class EdurasLauncher implements UpdateListener, ChannelListener {
 	}
 
 	private void afterEdurasUpdate() {
-		// TODO add eduras specific things
+		EdurasConfigFile file = new EdurasConfigFile();
+		try {
+			file.load();
+			website = file.getValue(EdurasConfigFile.KEY_WEBSITE,
+					"http://www.eduras.de");
+		} catch (IOException | URISyntaxException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
