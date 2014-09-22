@@ -71,9 +71,9 @@ public class GameStarter extends Thread {
 			if (p.exitValue() != 0) {
 				Scanner s = new Scanner(new BufferedInputStream(
 						p.getErrorStream()));
-				StringBuilder error = new StringBuilder();
+				StringBuilder error = new StringBuilder("<html>");
 				while (s.hasNextLine()) {
-					error.append(s.nextLine());
+					error.append(s.nextLine() + "<br>");
 				}
 				s.close();
 				gui.showError("Error starting game", error.toString());
