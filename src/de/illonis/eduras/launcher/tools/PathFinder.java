@@ -51,7 +51,7 @@ public class PathFinder {
 	}
 
 	public static Path getDataPath() throws URISyntaxException {
-		Path p = Paths.get(getBaseDir().getPath());
+		Path p = Paths.get(getBaseDir().toURI());
 		return p.resolve(EdurasLauncher.DATA_PATH);
 	}
 

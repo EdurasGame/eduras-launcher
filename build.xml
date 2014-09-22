@@ -74,7 +74,7 @@
 				<include name="**/*.desktop"></include>
 			</fileset>
 			<fileset dir="${jars}">
-				<include name="eduras-launcher.jar"></include>
+				<include name="eduras.jar"></include>
 			</fileset>
 			<manifest>
 				<attribute name="Main-Class"

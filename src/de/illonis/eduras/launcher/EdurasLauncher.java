@@ -225,7 +225,8 @@ public class EdurasLauncher implements UpdateListener, ChannelListener {
 			gui.setStatus("");
 			gui.setProgress(-1, "No channel selected.");
 		} else {
-			gui.showError("Update error", e.getMessage());
+			gui.showError("Update error", e.getClass().getSimpleName() + ": "
+					+ e.getMessage());
 			gui.setStatus("Update error");
 			gui.setProgress(-1, e.getMessage());
 		}
@@ -234,7 +235,8 @@ public class EdurasLauncher implements UpdateListener, ChannelListener {
 	@Override
 	public void onNetworkError(IOException e) {
 		e.printStackTrace();
-		gui.showError("Network error", e.getMessage());
+		gui.showError("Network error",
+				e.getClass().getSimpleName() + ": " + e.getMessage());
 		gui.setStatus("Network error");
 		gui.setProgress(-1, e.getMessage());
 	}

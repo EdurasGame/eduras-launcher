@@ -25,8 +25,7 @@ public class InstallTask extends SwingWorker<Boolean, Void> {
 
 	@Override
 	protected Boolean doInBackground() {
-		InputStream input = getClass().getResourceAsStream(
-				"/eduras-launcher.jar");
+		InputStream input = getClass().getResourceAsStream("/" + INSTALL_JAR);
 		InputStream input2 = getClass().getResourceAsStream("icon.png");
 
 		if (input == null || input2 == null) {
