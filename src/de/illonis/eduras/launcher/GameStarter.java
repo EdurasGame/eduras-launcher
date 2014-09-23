@@ -76,7 +76,29 @@ public class GameStarter extends Thread {
 					error.append(s.nextLine() + "<br>");
 				}
 				s.close();
-				gui.showError("Error starting game", error.toString());
+				String fullMessage = error.toString();
+				if (fullMessage.contains("ArrayIndexOutOfBoundsException")) {
+					// old error. suppress
+					cmdargs = new String[3];
+					cmdargs[0] = "java";
+					cmdargs[1] = "-jar";
+					cmdargs[2] = "game/eduras-client.jar";
+					p = Runtime.getRuntime().exec(cmdargs);
+					p.waitFor();
+					if (p.exitValue() != 0) {
+						Scanner s2 = new Scanner(new BufferedInputStream(
+								p.getErrorStream()));
+						StringBuilder error2 = new StringBuilder("<html>");
+						while (s2.hasNextLine()) {
+							error2.append(s2.nextLine() + "<br>");
+						}
+						s2.close();
+						String fullMessage2 = error2.toString();
+						gui.showError("Error starting game", fullMessage2);
+					}
+				} else {
+					gui.showError("Error starting game", fullMessage);
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
