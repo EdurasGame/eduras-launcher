@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 
 import javax.swing.JOptionPane;
 
@@ -29,23 +30,38 @@ public class LauncherUpdater {
 
 		Path downloadedPath = Paths.get(PathFinder.findFile("launcher.jar"));
 		Path targetPath = Paths.get(PathFinder.findFile("../eduras.jar"));
-
-		try {
-			Files.copy(downloadedPath, targetPath,
-					StandardCopyOption.REPLACE_EXISTING);
-		} catch (IOException e) {
+		int n = 1;
+		while (n < 10) {
+			try {
+				System.out.println("replacing old launcher (Try " + n
+						+ " of 10)");
+				Files.copy(downloadedPath, targetPath,
+						StandardCopyOption.REPLACE_EXISTING);
+				System.out.println("Replaced old launcher.");
+				break;
+			} catch (IOException e) {
+				e.printStackTrace();
+				try {
+					Thread.sleep(300);
+				} catch (InterruptedException ex) {
+				}
+			}
+			n++;
+		}
+		if (n == 10) {
 			JOptionPane.showMessageDialog(null,
-					"Replacing old launcher failed.");
-			e.printStackTrace();
-			return;
+					"Replacing old launcher failed after 10 attempts.");
 		}
 
 		String[] cmdargs = new String[3];
 		cmdargs[0] = "java";
 		cmdargs[1] = "-jar";
 		cmdargs[2] = targetPath.toString();
+		System.out.println("Starting new launcher with "
+				+ Arrays.toString(cmdargs));
 		try {
 			Runtime.getRuntime().exec(cmdargs);
+			System.exit(0);
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(null,
 					"Could not start new launcher. Please try manually.");
