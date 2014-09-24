@@ -29,7 +29,7 @@ import de.illonis.newup.client.UpdateResult;
  */
 public class EdurasLauncher implements UpdateListener, ChannelListener {
 
-	public final static int LAUNCHER_VERSION = 8;
+	public final static int LAUNCHER_VERSION = 9;
 	public final static String DATA_PATH = "game/";
 	private final static String SERVER_URL = "http://illonis.de/newup/";
 	private static final String DEFAULT_RELEASE_CHANNEL = "beta";
@@ -40,6 +40,7 @@ public class EdurasLauncher implements UpdateListener, ChannelListener {
 	private final URL serverURL;
 	private final Path localPath;
 	private String website;
+	private NeWUpClient client;
 
 	public static void main(String[] args) {
 
@@ -109,9 +110,15 @@ public class EdurasLauncher implements UpdateListener, ChannelListener {
 		}
 
 		gui.setStatus("Checking for updates...");
-		NeWUpClient client = new NeWUpClient(serverURL, localPath, channel);
+		gui.setButtonAbort();
+		client = new NeWUpClient(serverURL, localPath, channel);
 		client.addUpdateListener(this);
 		client.checkForUpdates(true);
+	}
+
+	public void abort() {
+		if (client != null)
+			client.abort();
 	}
 
 	public void setRelease(String newChannel) {
@@ -165,6 +172,7 @@ public class EdurasLauncher implements UpdateListener, ChannelListener {
 		}
 		gui.setProgress(100,
 				result.getServerVersion() + " (" + result.getServerTag() + ")");
+		gui.setButtonStart();
 		gui.enableControls();
 	}
 
@@ -176,7 +184,7 @@ public class EdurasLauncher implements UpdateListener, ChannelListener {
 			website = file.getValue(EdurasConfigFile.KEY_WEBSITE,
 					"http://www.eduras.de");
 			launcherVersion = Integer.parseInt(file.getValue(
-					EdurasConfigFile.KEY_LAUNCHERVERSION, "0"));
+					EdurasConfigFile.KEY_LAUNCHERVERSION, "0").trim());
 		} catch (IOException | URISyntaxException e) {
 			e.printStackTrace();
 		}
@@ -220,8 +228,6 @@ public class EdurasLauncher implements UpdateListener, ChannelListener {
 					"Releasechannel \""
 							+ releaseChannel
 							+ "\" is not available. Please select another one from list.");
-			gui.enableControls();
-			gui.disableStart();
 			gui.setStatus("");
 			gui.setProgress(-1, "No channel selected.");
 		} else {
@@ -230,6 +236,8 @@ public class EdurasLauncher implements UpdateListener, ChannelListener {
 			gui.setStatus("Update error");
 			gui.setProgress(-1, e.getMessage());
 		}
+		gui.enableControls();
+		gui.disableStart();
 	}
 
 	@Override
@@ -249,7 +257,10 @@ public class EdurasLauncher implements UpdateListener, ChannelListener {
 	@Override
 	public void onUpdateCancelled() {
 		gui.setProgress(1, "Update cancelled");
-		// TODO: ka
+		gui.setStatus("Please select a release to start downloading.");
+		gui.setButtonStart();
+		gui.enableControls();
+		gui.disableStart();
 	}
 
 	@Override

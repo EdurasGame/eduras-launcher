@@ -32,11 +32,13 @@ public class LauncherGui extends JFrame implements ActionListener {
 	private DefaultComboBoxModel<String> releases;
 	private final EdurasLauncher launcher;
 	private JButton websiteButton;
+	private boolean abort;
 
 	public LauncherGui(EdurasLauncher launcher) {
 		super();
 		this.launcher = launcher;
 		buildGui();
+		abort = true;
 	}
 
 	@Override
@@ -67,7 +69,6 @@ public class LauncherGui extends JFrame implements ActionListener {
 		startButton = new JButton("Start game");
 		startButton.setEnabled(false);
 		startButton.addActionListener(this);
-
 		bottomPanel.add(updateBar, BorderLayout.CENTER);
 		bottomPanel.add(startButton, BorderLayout.EAST);
 
@@ -153,7 +154,13 @@ public class LauncherGui extends JFrame implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == startButton) {
-			launcher.launchGame();
+			if (abort) {
+				launcher.abort();
+				startButton.setText("Cancelling...");
+				startButton.setEnabled(false);
+			} else {
+				launcher.launchGame();
+			}
 		} else if (e.getSource() == releaseSelect && releaseSelect.isEnabled()) {
 			String release = (String) releaseSelect.getSelectedItem();
 			if (release != null)
@@ -167,6 +174,17 @@ public class LauncherGui extends JFrame implements ActionListener {
 				}
 			}
 		}
+	}
+
+	public void setButtonAbort() {
+		abort = true;
+		startButton.setText("Cancel");
+		startButton.setEnabled(true);
+	}
+
+	public void setButtonStart() {
+		abort = false;
+		startButton.setText("Start game");
 	}
 
 	public void disableControls() {
