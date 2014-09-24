@@ -29,7 +29,7 @@ import de.illonis.newup.client.UpdateResult;
  */
 public class EdurasLauncher implements UpdateListener, ChannelListener {
 
-	public final static int LAUNCHER_VERSION = 7;
+	public final static int LAUNCHER_VERSION = 8;
 	public final static String DATA_PATH = "game/";
 	private final static String SERVER_URL = "http://illonis.de/newup/";
 	private static final String DEFAULT_RELEASE_CHANNEL = "beta";

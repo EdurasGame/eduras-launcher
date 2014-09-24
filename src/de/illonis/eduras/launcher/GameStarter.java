@@ -1,12 +1,10 @@
 package de.illonis.eduras.launcher;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.Scanner;
 
 import de.illonis.eduras.launcher.gui.LauncherGui;
 import de.illonis.eduras.launcher.installer.OsValidator;
@@ -63,46 +61,12 @@ public class GameStarter extends Thread {
 			cmdargs[i++] = arg;
 		}
 
+		System.out.println("executing: " + Arrays.toString(cmdargs));
 		try {
-			System.out.println("executing: " + Arrays.toString(cmdargs));
-			Process p = Runtime.getRuntime().exec(cmdargs);
+			Runtime.getRuntime().exec(cmdargs);
 			gui.setStatus("Game is running...");
-			p.waitFor();
-			if (p.exitValue() != 0) {
-				Scanner s = new Scanner(new BufferedInputStream(
-						p.getErrorStream()));
-				StringBuilder error = new StringBuilder("<html>");
-				while (s.hasNextLine()) {
-					error.append(s.nextLine() + "<br>");
-				}
-				s.close();
-				String fullMessage = error.toString();
-				if (fullMessage.contains("ArrayIndexOutOfBoundsException")) {
-					// old error. suppress
-					cmdargs = new String[3];
-					cmdargs[0] = "java";
-					cmdargs[1] = "-jar";
-					cmdargs[2] = "game/eduras-client.jar";
-					p = Runtime.getRuntime().exec(cmdargs);
-					p.waitFor();
-					if (p.exitValue() != 0) {
-						Scanner s2 = new Scanner(new BufferedInputStream(
-								p.getErrorStream()));
-						StringBuilder error2 = new StringBuilder("<html>");
-						while (s2.hasNextLine()) {
-							error2.append(s2.nextLine() + "<br>");
-						}
-						s2.close();
-						String fullMessage2 = error2.toString();
-						gui.showError("Error starting game", fullMessage2);
-					}
-				} else {
-					gui.showError("Error starting game", fullMessage);
-				}
-			}
+			System.exit(0);
 		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
