@@ -29,11 +29,10 @@ import de.illonis.newup.client.UpdateResult;
  */
 public class EdurasLauncher implements UpdateListener, ChannelListener {
 
-	public final static int LAUNCHER_VERSION = 9;
+	public final static int LAUNCHER_VERSION = 10;
 	public final static String DATA_PATH = "game/";
 	private final static String SERVER_URL = "http://illonis.de/newup/";
 	private static final String DEFAULT_RELEASE_CHANNEL = "beta";
-	private final static String GAME_JAR = DATA_PATH + "eduras-client.jar";
 
 	private final LauncherGui gui;
 	private String releaseChannel;
@@ -142,7 +141,7 @@ public class EdurasLauncher implements UpdateListener, ChannelListener {
 
 		@Override
 		public void run() {
-			GameStarter starter = new GameStarter(gui, GAME_JAR);
+			GameStarter starter = new GameStarter(gui);
 			starter.start();
 			try {
 				starter.join();

@@ -1,9 +1,7 @@
 package de.illonis.eduras.launcher.tools;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.CodeSource;
@@ -23,35 +21,35 @@ public class PathFinder {
 	 * 
 	 * @return the jar's location.
 	 */
-	public static URL getBaseDir() {
+	public static URI getBaseDir() {
 		try {
 			// try another way
 			CodeSource source = PathFinder.class.getProtectionDomain()
 					.getCodeSource();
 			if (source != null) {
-				URL url2 = source.getLocation();
+				URI url2 = source.getLocation().toURI();
 				if (url2.toString().endsWith(".jar")) {
-					return new URL(url2, ".");
+					return url2.resolve(".");
 				}
 				return url2;
 			} else {
-				URL url = ClassLoader.getSystemClassLoader().getResource(".");
+				URI url = ClassLoader.getSystemClassLoader().getResource(".")
+						.toURI();
 				if (url != null) {
-					URL parent = new URL(url, "../");
+					URI parent = url.resolve("../");
 					return parent;
 				} else {
 					throw new RuntimeException(
 							"Base directory could not be resolved.");
 				}
 			}
-		} catch (MalformedURLException e) {
-			System.out.println("base dir not found.");
+		} catch (URISyntaxException e) {
 			return null;
 		}
 	}
 
-	public static Path getDataPath() throws URISyntaxException {
-		Path p = Paths.get(getBaseDir().toURI());
+	public static Path getDataPath() {
+		Path p = Paths.get(getBaseDir());
 		return p.resolve(EdurasLauncher.DATA_PATH);
 	}
 
@@ -61,17 +59,9 @@ public class PathFinder {
 	 * 
 	 * @param fileName
 	 *            the file name.
-	 * @return
+	 * @return an uri pointing to that file.
 	 */
 	public static URI findFile(String fileName) {
-		try {
-			URI uri = new URL(PathFinder.getBaseDir(), fileName).toURI();
-			return uri;
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-		}
-		return null;
+		return PathFinder.getBaseDir().resolve(fileName);
 	}
 }

@@ -1,13 +1,12 @@
 package de.illonis.eduras.launcher;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 
 import de.illonis.eduras.launcher.gui.LauncherGui;
-import de.illonis.eduras.launcher.installer.OsValidator;
 import de.illonis.eduras.launcher.tools.PathFinder;
 
 /**
@@ -21,15 +20,9 @@ public class GameStarter extends Thread {
 	private final LinkedList<String> args = new LinkedList<String>();
 	private final LauncherGui gui;
 
-	public GameStarter(LauncherGui gui, URI jarFile) {
+	public GameStarter(LauncherGui gui) {
 		super("GameStarter");
 		this.gui = gui;
-		String path = new File(jarFile).getAbsolutePath();
-		args.add(path);
-	}
-
-	public GameStarter(LauncherGui gui, String targetName) {
-		this(gui, PathFinder.findFile(targetName));
 	}
 
 	/**
@@ -50,11 +43,11 @@ public class GameStarter extends Thread {
 		gui.setStatus("Starting game..");
 		String[] cmdargs = new String[args.size() + 4];
 		cmdargs[0] = "java";
+		Path currentPath = Paths.get(PathFinder.getBaseDir());
+		String first = currentPath.resolve("game/eduras-client.jar").toString();
+		String second = currentPath.resolve("game/data/lib").toString() + "/*";
 		cmdargs[1] = "-classpath";
-		if (OsValidator.isWindows()) {
-			cmdargs[2] = "game/eduras-client.jar;game/data/lib/*";
-		} else
-			cmdargs[2] = "game/eduras-client.jar:game/data/lib/*";
+		cmdargs[2] = first + System.getProperty("path.separator") + second;
 		cmdargs[3] = "de.illonis.eduras.gameclient.EdurasClient";
 		int i = 4;
 		for (String arg : args) {
