@@ -40,9 +40,10 @@ public class DonePanel extends JPanel implements ActionListener {
 		cmdargs[1] = "-jar";
 		cmdargs[2] = path;
 		startButton.setText("Starting...");
-		startButton.setEnabled(false);
 		try {
 			Process p = Runtime.getRuntime().exec(cmdargs);
+			startButton.setEnabled(false);
+			System.exit(0);
 		} catch (IOException e) {
 			infoLabel
 					.setText("Error starting launcher. Try starting manually.");

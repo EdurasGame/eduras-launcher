@@ -42,6 +42,13 @@ public class InstallTask extends SwingWorker<Boolean, Void> {
 			error = e.getMessage();
 			e.printStackTrace();
 			return false;
+		} finally {
+			try {
+				input.close();
+				input2.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
 		createLauncherIcon();
