@@ -23,7 +23,7 @@ public class DonePanel extends JPanel implements ActionListener {
 		startButton = new JButton("Start game");
 		add(startButton, BorderLayout.SOUTH);
 		startButton.addActionListener(this);
-		infoLabel = new JLabel("Setup completed");
+		infoLabel = new JLabel("Setup completed. Start game by running " + InstallTask.CLIENT_JAR);
 		infoLabel.setHorizontalAlignment(JLabel.CENTER);
 		add(infoLabel, BorderLayout.CENTER);
 	}
@@ -45,13 +45,12 @@ public class DonePanel extends JPanel implements ActionListener {
 			startButton.setEnabled(false);
 			System.exit(0);
 		} catch (IOException e) {
-			infoLabel
-					.setText("Error starting launcher. Try starting manually.");
+			infoLabel.setText("Error starting launcher. Try starting manually.");
 		}
 	}
 
 	public void setPath(Path targetPath) {
-		this.target = targetPath.resolve(InstallTask.INSTALL_JAR);
+		this.target = targetPath.resolve(InstallTask.CLIENT_JAR);
 	}
 
 }
