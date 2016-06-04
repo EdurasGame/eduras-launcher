@@ -10,6 +10,7 @@
 	<path id="launcherclasspath">
 		<fileset dir="${libs}">
 			<include name="newup*" />
+			<include name="zip4j*" />
 		</fileset>
 		<pathelement path="${build}" />
 	</path>
