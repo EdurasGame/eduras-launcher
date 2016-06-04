@@ -17,8 +17,8 @@ import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 
 public class InstallTask extends SwingWorker<Boolean, Void> {
-	private final static String DOWNLOAD_URL_RES = "file:///home/illonis/git/eduras-res/master.zip";
-	private final static String DOWNLOAD_URL_CLIENT = "file:///home/illonis/git/eduras/dist/jars/eduras-client.jar";
+	private final static String DOWNLOAD_URL_RES = "https://github.com/EdurasGame/eduras-res/archive/master.zip";
+	private final static String DOWNLOAD_URL_CLIENT = "https://github.com/EdurasGame/eduras/releases/download/v1.0/eduras-client.jar";
 
 	public final static String CLIENT_JAR = "eduras.jar";
 
