@@ -60,9 +60,7 @@
 				<include name="**/*.gif"></include>
 				<include name="**/*.desktop"></include>
 			</fileset>
-			<fileset dir="${jars}">
-				<include name="eduras.jar"></include>
-			</fileset>
+			<zipgroupfileset dir="${libs}" includes="**/*.jar" />
 			<manifest>
 				<attribute name="Main-Class"
 					value="de.illonis.eduras.launcher.installer.EdurasInstaller" />

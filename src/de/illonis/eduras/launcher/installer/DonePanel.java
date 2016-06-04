@@ -20,7 +20,7 @@ public class DonePanel extends JPanel implements ActionListener {
 
 	public DonePanel() {
 		super(new BorderLayout());
-		startButton = new JButton("Start game");
+		startButton = new JButton("Close");
 		add(startButton, BorderLayout.SOUTH);
 		startButton.addActionListener(this);
 		infoLabel = new JLabel("Setup completed. Start game by running " + InstallTask.CLIENT_JAR);
@@ -34,19 +34,7 @@ public class DonePanel extends JPanel implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent event) {
-		String path = new File(target.toUri()).getAbsolutePath();
-		String[] cmdargs = new String[3];
-		cmdargs[0] = "java";
-		cmdargs[1] = "-jar";
-		cmdargs[2] = path;
-		startButton.setText("Starting...");
-		try {
-			Process p = Runtime.getRuntime().exec(cmdargs);
-			startButton.setEnabled(false);
-			System.exit(0);
-		} catch (IOException e) {
-			infoLabel.setText("Error starting launcher. Try starting manually.");
-		}
+		System.exit(0);
 	}
 
 	public void setPath(Path targetPath) {

@@ -23,7 +23,7 @@ public class InstallTask extends SwingWorker<Boolean, Void> {
 	public final static String CLIENT_JAR = "eduras.jar";
 
 	private final InstallFinishedListener listener;
-	private final Path target;
+	private Path target;
 	private String error = "";
 
 	public InstallTask(Path target, InstallFinishedListener listener) {
@@ -45,6 +45,7 @@ public class InstallTask extends SwingWorker<Boolean, Void> {
 			try {
 				ZipFile f = new ZipFile(tmpFile.toFile());
 				f.extractAll(target.toString());
+				target = target.resolve("eduras-res-master");
 				deleteFileOrFolder(target.resolve("src"));
 			} catch (ZipException e) {
 				e.printStackTrace();
